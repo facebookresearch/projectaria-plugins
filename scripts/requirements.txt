@@ -1,4 +1,4 @@
 # Validation script dependencies. Kept tiny on purpose.
-jsonschema>=4.0,<5
+jsonschema>=4.26.0,<5
 python-frontmatter>=1.0,<2
 PyYAML>=6.0,<7
