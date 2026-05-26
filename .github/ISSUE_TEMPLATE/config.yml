@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project Aria documentation
+    url: https://facebookresearch.github.io/projectaria_tools/
+    about: Reference docs for Project Aria, ProjectAriaTools, and MPS.
+  - name: Project Aria community Discord
+    url: https://discord.gg/projectaria
+    about: Ask questions and chat with the Aria community.
+  - name: Security vulnerabilities
+    url: https://bugbounty.meta.com/
+    about: Please report security issues through Meta's bug bounty program, not GitHub.

@@ -1,0 +1,48 @@
+# Lychee link checker configuration.
+# See https://github.com/lycheeverse/lychee for full reference.
+
+# Verbose output for CI logs.
+verbose = "info"
+
+# Don't error on rate limits / transient 5xx — re-run instead.
+max_retries = 3
+retry_wait_time = 2
+timeout = 20
+
+# Be polite to remote servers.
+max_concurrency = 8
+
+# Use the lychee cache to avoid re-checking unchanged links on every PR.
+cache = true
+max_cache_age = "7d"
+
+# Accept these status codes as "OK".
+accept = ["200", "203", "206", "429"]
+
+# Skip examples and template links.
+exclude = [
+  # localhost and private hosts
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^https?://0\\.0\\.0\\.0",
+  # Meta internal hosts — only reachable from the internal network
+  "^https?://[a-z0-9.-]*\\.internalfb\\.com",
+  "^https?://[a-z0-9.-]*\\.fb\\.com",
+  "^https?://[a-z0-9.-]*\\.facebook\\.com",
+  "^https?://[a-z0-9.-]*\\.workplace\\.com",
+  "^https?://fb\\.workplace\\.com",
+  # Placeholder hosts used in examples
+  "example\\.com",
+]
+
+# GitHub anchors are notoriously flaky to check — skip fragments only.
+include_fragments = false
+
+# Don't follow `mailto:` links.
+exclude_mail = true
+
+# Treat 200-299 as success and warn on redirects, fail on others.
+exclude_path = [
+  "node_modules",
+  ".github/ISSUE_TEMPLATE",
+]

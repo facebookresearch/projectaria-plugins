@@ -1,0 +1,48 @@
+name: 🧠 New skill proposal
+description: Propose a new skill to be added to a Project Aria plugin.
+title: "[Skill] "
+labels: [skill-proposal, needs-triage]
+body:
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Target plugin
+      options:
+        - aria-ark
+        - new plugin (describe below)
+    validations:
+      required: true
+
+  - type: input
+    id: skill-name
+    attributes:
+      label: Proposed skill name (kebab-case)
+      placeholder: e.g. trajectory-analysis
+    validations:
+      required: true
+
+  - type: textarea
+    id: trigger
+    attributes:
+      label: When should Claude use this skill?
+      description: |
+        Describe the trigger conditions — what should the user be asking, or what
+        file types/SDKs should be present, for Claude to load this skill?
+    validations:
+      required: true
+
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: What should the skill do?
+      description: List the tasks, code patterns, or workflows the skill enables.
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Wiki pages, docs, GitHub repos, or related code.
+    validations:
+      required: false

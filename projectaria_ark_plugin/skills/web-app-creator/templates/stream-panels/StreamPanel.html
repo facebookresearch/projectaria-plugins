@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aria Stream Panel</title>
+<style>
+  /* ──────────────────────────────────────────────────────────────────────── */
+  /* Web App Creator StreamPanel — single-file vanilla rewrite of dashboard JSX.    */
+  /* Light theme only. Hardcoded layout (single-column, scrollable) so the   */
+  /* file is easy to drop into a sandbox iframe under generated_components/. */
+  /* ──────────────────────────────────────────────────────────────────────── */
+
+  :root {
+    --bg-app:        #FFFFFF;
+    --bg-section:    #F7F5F2;
+    --bg-inner:      #FFFFFF;
+    --bg-topbar:     #2C0D00;
+    --text-primary:  #1C2B33;
+    --text-muted:    #67788A;
+    --text-warm:     #B4A89C;
+    --border-soft:   rgba(103, 120, 138, 0.20);
+    --accent-teal:   #18EED4;
+    --accent-emerald:#0C9E8D;
+    --accent-red:    #ef4444;
+    --accent-green:  #22c55e;
+    --accent-blue:   #3b82f6;
+    --accent-purple: #a78bfa;
+    --accent-pink:   #f87171;
+    --section-radius: 16px;
+    --inner-radius:   8px;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg-app); color: var(--text-primary); font-family: var(--font-sans); height: 100%; }
+  body { display: flex; flex-direction: column; }
+
+  /* ── Top bar ── */
+  .topbar {
+    height: 50px;
+    padding: 0 16px;
+    background: var(--bg-topbar);
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .topbar .brand { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; color: #fff; }
+  .topbar .status-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.2s;
+  }
+  .topbar .status-dot.live {
+    background: var(--accent-teal);
+    box-shadow: 0 0 6px rgba(24,238,212,0.7);
+    animation: pulse-bright 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-bright {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+  }
+
+  /* ── Scrollable content area ── */
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .grid {
+    display: grid;
+    /* Auto-responsive: 1 col below ~620 px, 2 cols up to ~1240 px, 3 cols beyond.
+       Each track is at least 300 px wide so contents (camera previews, gauges,
+       text) stay readable. The min(100%, 300px) guard prevents horizontal
+       overflow inside very narrow containers (e.g. Manus side-preview iframe). */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 8px;
+  }
+  /* Always-full-width helper (used on the Device Status header and RGB camera). */
+  .grid .span-all { grid-column: 1 / -1; }
+
+  /* Wide-viewport hint: when there's room for 3+ columns, let SLAM and Eye
+     Tracking take 2 of them so their camera previews stay legible. */
+  @media (min-width: 1200px) {
+    .grid .span-2 { grid-column: span 2; }
+  }
+
+  /* ── Sections ── */
+  .section {
+    background: var(--bg-section);
+    border-radius: var(--section-radius);
+    padding: 8px;
+  }
+  .section h4 {
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .section h4 svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .section .head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .section .head .controls { display: flex; align-items: center; gap: 4px; }
+
+  .inner {
+    background: var(--bg-inner);
+    border-radius: var(--inner-radius);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    width: 100%; height: 100%;
+  }
+  .badge {
+    position: absolute;
+    bottom: 4px; right: 4px;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: var(--font-mono);
+  }
+  .badge-row { position: absolute; bottom: 4px; right: 4px; display: flex; align-items: center; gap: 4px; }
+
+  /* ── Device status header ── */
+  .device-status {
+    background: var(--bg-section);
+    border-radius: 12px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .device-status .specs-icon {
+    width: 36px; height: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+  .device-status .info { flex: 1; min-width: 0; }
+  .device-status .name {
+    font-size: 12px; font-weight: 600;
+    color: var(--bg-topbar);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .device-status .conn { font-size: 10px; font-weight: 500; color: var(--text-muted); }
+  .device-status .conn.live { color: var(--bg-topbar); }
+  .device-status .badges { display: flex; align-items: center; gap: 10px; color: var(--text-muted); }
+  .device-status .badges.live { color: var(--bg-topbar); }
+  .device-status .temp { font-size: 10px; font-weight: 500; }
+  .device-status .temp.warm { color: #F59E0B; }
+  .device-status .temp.hot  { color: var(--accent-red); }
+
+  /* ── Common rows (VIO / IMU value lists) ── */
+  .row { display: flex; justify-content: space-between; font-size: 12px; line-height: 1.45; }
+  .row.dim span:first-child { font-size: 11px; }
+  .pad { padding: 8px; border-radius: var(--inner-radius); background: var(--bg-inner); }
+  .label { color: var(--text-muted); font-size: 11px; }
+  .value { font-family: var(--font-mono); color: var(--text-primary); }
+  .red    { color: var(--accent-red); }
+  .green  { color: var(--accent-green); }
+  .blue   { color: var(--accent-blue); }
+  .purple { color: var(--accent-purple); }
+  .teal   { color: var(--accent-teal); }
+  .emerald { color: var(--accent-emerald); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; text-align: center; font-size: 11px; }
+
+  /* ── Camera frame containers (4:3, etc.) ── */
+  .frame-43 { aspect-ratio: 4 / 3; }
+  .frame-52 { aspect-ratio: 5 / 2; }
+  .frame-41 { aspect-ratio: 4 / 1; }
+  .frame-21 { aspect-ratio: 2 / 1; }
+  .frame canvas, .frame img {
+    display: block; width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .frame canvas.pixelated { image-rendering: pixelated; }
+
+  /* ── TTS section ── */
+  .tts-shell {
+    background: #fff;
+    border-radius: 12px;
+    padding: 8px;
+  }
+  .tts-shell textarea {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    resize: none;
+    outline: none;
+    font-size: 12px;
+    color: var(--text-primary);
+    min-height: 18px;
+    max-height: 80px;
+    font-family: inherit;
+  }
+  .tts-shell textarea::placeholder { color: #9CA3AF; }
+  .tts-shell .actions {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 6px;
+  }
+  .quick-btns { display: flex; align-items: center; gap: 4px; }
+  .quick-btn {
+    font-size: 10px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 4px;
+    border: 1px solid #E5E7EB;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 2px;
+    transition: border-color 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  .quick-btn:hover { border-color: var(--accent-teal); color: var(--text-primary); }
+  .send-btn {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg-topbar);
+    color: var(--accent-teal);
+    border: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .send-btn[disabled] { opacity: 0.2; cursor: default; }
+  .tts-status {
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--accent-emerald);
+  }
+  .tts-status.error { color: var(--accent-red); }
+
+  /* ── Audio toggle button ── */
+  .icon-btn {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .icon-btn.active { color: var(--accent-teal); }
+  .icon-btn svg { width: 14px; height: 14px; }
+
+  /* ── Eye-tracking gaze hint ── */
+  .gaze-hint, .ppg-hint {
+    position: absolute;
+    top: 4px; right: 4px;
+    font-size: 9px;
+    color: #9BA8B4;
+    pointer-events: none;
+  }
+  .gaze-readout, .ppg-readout {
+    position: absolute;
+    bottom: 4px; right: 4px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 9px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<div class="topbar">
+  <div class="brand">ARIA · Stream Panel</div>
+  <div id="connDot" class="status-dot" title="Disconnected"></div>
+</div>
+
+<!-- ── Scrollable content area ── -->
+<div class="scroll">
+  <div class="grid">
+
+    <!-- ── Device Status ── -->
+    <div id="deviceStatus" class="device-status span-all">
+      <!-- Aria specs thumbnail (replaces the old inline SVG outline). -->
+      <img class="specs-icon" src="../resources/aria-specs.png" alt="Aria glasses" />
+      <div class="info">
+        <div id="dsName" class="name">No device</div>
+        <div id="dsConn" class="conn">Disconnected</div>
+      </div>
+      <div id="dsBadges" class="badges">
+        <!-- Headphones -->
+        <svg id="dsAudio" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18v-6a9 9 0 0118 0v6"/>
+          <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+        </svg>
+        <!-- WiFi -->
+        <svg id="dsWifi" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.55a11 11 0 0114.08 0"/>
+          <path d="M1.42 9a16 16 0 0121.16 0"/>
+          <path d="M8.53 16.11a6 6 0 016.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        </svg>
+        <!-- Battery -->
+        <svg id="dsBattery" width="28" height="13" viewBox="0 0 28 13" fill="none">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="2" stroke="currentColor" stroke-width="1" fill="none"/>
+          <rect x="24" y="3.5" width="2.5" height="6" rx="0.8" fill="currentColor" opacity="0.5"/>
+          <rect id="dsBatteryFill" x="1.5" y="1.5" width="0" height="10" rx="1.2" fill="currentColor" opacity="0.25"/>
+          <text id="dsBatteryText" x="12" y="9.5" text-anchor="middle" fill="currentColor" style="font-size:7.5px;font-weight:600;">—</text>
+        </svg>
+        <!-- Temperature -->
+        <span id="dsTemp" class="temp"></span>
+      </div>
+    </div>
+
+    <!-- ── 1. RGB Camera ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><circle cx="12" cy="13" r="4"/></svg>
+          RGB Camera
+        </h4>
+      </div>
+      <div class="inner frame-43 frame">
+        <img id="rgbImg" alt="RGB" style="display:none;" />
+        <div id="rgbPlaceholder" class="placeholder">Waiting for video stream…</div>
+        <span id="rgbBadge" class="badge">RGB</span>
+      </div>
+    </div>
+
+    <!-- ── 2. SLAM Cameras ── -->
+    <div class="section span-2">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span id="slamLabel">SLAM (–)</span>
+        </h4>
+      </div>
+      <div id="slamGrid" class="grid-2"></div>
+    </div>
+
+    <!-- ── 3. Eye Tracking ── -->
+    <div class="section span-2">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><circle cx="12" cy="12" r="3"/></svg>
+          Eye Tracking
+        </h4>
+      </div>
+      <div class="grid-2" style="margin-bottom:8px;">
+        <div class="inner frame-43 frame">
+          <canvas id="etLeftCanvas" width="160" height="120" class="pixelated"></canvas>
+          <span class="badge">L</span>
+        </div>
+        <div class="inner frame-43 frame">
+          <canvas id="etRightCanvas" width="160" height="120" class="pixelated"></canvas>
+          <span class="badge">R</span>
+        </div>
+      </div>
+      <div class="inner frame-52 frame">
+        <canvas id="gazeCanvas" width="300" height="120"></canvas>
+        <div id="gazeHint" class="gaze-hint" style="display:none;">Put on your glasses to capture eye tracking</div>
+        <div class="gaze-readout">
+          <span><span class="emerald">Yaw</span> <span id="gazeYaw">0.000</span></span>
+          <span><span class="emerald">Pitch</span> <span id="gazePitch">0.000</span></span>
+          <span><span class="emerald">Depth</span> <span id="gazeDepth">0.00</span>m</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. Hand Tracking ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2.5a7.5 7.5 0 0015 0v-5.5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1.5m0 0V11m0-5.5a1.5 1.5 0 013 0v5.5"/></svg>
+          Hand Tracking
+        </h4>
+      </div>
+      <div class="grid-2">
+        <div class="inner frame-43 frame">
+          <canvas id="leftHandCanvas" width="200" height="150"></canvas>
+          <div class="badge-row">
+            <span id="leftPinch"  class="badge" title="Pinch detected" style="display:none;">👌</span>
+            <span id="leftThumbs" class="badge" title="Thumbs up"      style="display:none;">👍</span>
+            <span id="leftPoint"  class="badge" title="Pointing"       style="display:none;">👆</span>
+            <span class="badge"><span id="leftJointCount">0</span> Joints</span>
+          </div>
+          <div id="leftPlaceholder" class="placeholder" style="position:absolute;inset:0;">No data</div>
+        </div>
+        <div class="inner frame-43 frame">
+          <canvas id="rightHandCanvas" width="200" height="150"></canvas>
+          <div class="badge-row">
+            <span id="rightPinch"  class="badge" title="Pinch detected" style="display:none;">👌</span>
+            <span id="rightThumbs" class="badge" title="Thumbs up"      style="display:none;">👍</span>
+            <span id="rightPoint"  class="badge" title="Pointing"       style="display:none;">👆</span>
+            <span class="badge"><span id="rightJointCount">0</span> Joints</span>
+          </div>
+          <div id="rightPlaceholder" class="placeholder" style="position:absolute;inset:0;">No data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 5. Statistics ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4.5" height="9" rx="1"/><rect x="9.75" y="7.5" width="4.5" height="13.5" rx="1"/><rect x="16.5" y="3" width="4.5" height="18" rx="1"/></svg>
+          Statistics
+        </h4>
+      </div>
+      <div class="pad">
+        <div class="grid-3">
+          <div><span class="label">FPS </span><span class="value" id="statFps">0</span></div>
+          <div><span class="label">Msgs </span><span class="value" id="statMsgs">0</span></div>
+          <div><span class="label">Status </span><span id="statStatus" style="color:var(--text-muted);">Offline</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. VIO ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10.5" r="3"/><path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+          VIO
+        </h4>
+      </div>
+      <div class="grid-2">
+        <div class="pad">
+          <div class="label" style="margin-bottom:4px;">Position (m)</div>
+          <div class="row"><span class="red">X</span><span class="value" id="vioX">–</span></div>
+          <div class="row"><span class="green">Y</span><span class="value" id="vioY">–</span></div>
+          <div class="row"><span class="blue">Z</span><span class="value" id="vioZ">–</span></div>
+        </div>
+        <div class="pad">
+          <div class="label" style="margin-bottom:4px;">Euler (°)</div>
+          <div class="row"><span class="red">Yaw</span><span class="value"><span id="vioYaw">–</span>°</span></div>
+          <div class="row"><span class="green">Pitch</span><span class="value"><span id="vioPitch">–</span>°</span></div>
+          <div class="row"><span class="blue">Roll</span><span class="value"><span id="vioRoll">–</span>°</span></div>
+        </div>
+      </div>
+      <div class="pad" style="margin-top:8px;">
+        <div class="label" style="margin-bottom:4px;">Quaternion</div>
+        <div class="grid-4">
+          <div><span class="purple">W</span><div class="value" id="qW">–</div></div>
+          <div><span class="red">X</span><div class="value" id="qX">–</div></div>
+          <div><span class="green">Y</span><div class="value" id="qY">–</div></div>
+          <div><span class="blue">Z</span><div class="value" id="qZ">–</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7. IMU ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          IMU
+        </h4>
+      </div>
+      <div class="grid-2">
+        <div class="pad">
+          <div class="label" style="margin-bottom:4px;">Accel (m/s²)</div>
+          <div class="row"><span class="red">X</span><span class="value" id="accelX">–</span></div>
+          <div class="row"><span class="green">Y</span><span class="value" id="accelY">–</span></div>
+          <div class="row"><span class="blue">Z</span><span class="value" id="accelZ">–</span></div>
+          <div class="inner frame-21 frame" style="margin-top:8px;background:rgba(255,255,255,0.6);">
+            <canvas id="accelCanvas" width="180" height="80"></canvas>
+          </div>
+        </div>
+        <div class="pad">
+          <div class="label" style="margin-bottom:4px;">Gyro (rad/s)</div>
+          <div class="row"><span class="red">X</span><span class="value" id="gyroX">–</span></div>
+          <div class="row"><span class="green">Y</span><span class="value" id="gyroY">–</span></div>
+          <div class="row"><span class="blue">Z</span><span class="value" id="gyroZ">–</span></div>
+          <div class="inner frame-21 frame" style="margin-top:8px;background:rgba(255,255,255,0.6);">
+            <canvas id="gyroCanvas" width="180" height="80"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 8. Audio ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"/></svg>
+          Audio
+        </h4>
+        <div class="controls">
+          <button id="audioToggle" class="icon-btn" title="Play audio">
+            <!-- "muted" speaker -->
+            <svg id="audioIconMuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-3.14a.75.75 0 011.28.53v12.72a.75.75 0 01-1.28.53l-4.72-3.14H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg>
+            <svg id="audioIconLive" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-3.14a.75.75 0 011.28.53v12.72a.75.75 0 01-1.28.53l-4.72-3.14H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="inner frame-41 frame">
+        <canvas id="audioCanvas" width="400" height="100"></canvas>
+        <div id="audioPlaceholder" class="placeholder" style="position:absolute;inset:0;">Waiting for audio data…</div>
+      </div>
+    </div>
+
+    <!-- ── 9. Text-to-Speech ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg>
+          Text-to-Speech
+        </h4>
+      </div>
+      <div class="tts-shell">
+        <textarea id="ttsInput" rows="1" placeholder="Speak to Aria…"></textarea>
+        <div class="actions">
+          <div class="quick-btns">
+            <button class="quick-btn" data-tts="Hello!">Hello! ↑</button>
+            <button class="quick-btn" data-tts="Mind the gap!">Mind the gap! ↑</button>
+          </div>
+          <button id="ttsSend" class="send-btn" disabled>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="ttsStatus" class="tts-status" style="display:none;"></div>
+    </div>
+
+    <!-- ── 10. PPG ── -->
+    <div class="section">
+      <div class="head">
+        <h4>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+          PPG
+        </h4>
+      </div>
+      <div class="inner frame-41 frame">
+        <canvas id="ppgCanvas" width="400" height="100"></canvas>
+        <div id="ppgPlaceholder" class="placeholder" style="position:absolute;inset:0;">Waiting for PPG data…</div>
+        <div id="ppgHint" class="ppg-hint" style="display:none;">Put on your glasses to capture PPG</div>
+        <div class="ppg-readout">
+          <span><span class="red">BPM</span> <span id="ppgBpm">--</span></span>
+          <span><span class="red">Raw</span> <span id="ppgRaw">--</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* WebSocket binary frame parser (inlined from useNebulaStream.js).        */
+/* Header: byte 0 = type (0x01=RGB, 0x02=SLAM, 0x03=ET),                   */
+/*         byte 1 = camera_id length, bytes 2..N = camera_id, rest = JPEG. */
+/* ──────────────────────────────────────────────────────────────────────── */
+const BINARY_FRAME_RGB  = 0x01;
+const BINARY_FRAME_SLAM = 0x02;
+const BINARY_FRAME_ET   = 0x03;
+
+const ALL_STREAMS = [
+  'vio', 'hand_tracking', 'eye_gaze', 'imu',
+  'rgb_frame', 'slam_frame', 'et_frame',
+  'audio', 'ppg', 'device_status'
+];
+
+const WS_URL              = 'ws://localhost:17300';
+const MAX_RECONNECT       = 20;
+const BASE_RECONNECT_MS   = 2000;
+const RING_BUFFER_SIZE    = 48000 * 2;
+const AUDIO_HISTORY_MAX   = 100;
+const PPG_HISTORY_MAX     = 150;
+const GAZE_HINT_DELAY_MS  = 5000;
+
+/* ── DOM refs ── */
+const el = (id) => document.getElementById(id);
+
+const connDot      = el('connDot');
+const rgbImg       = el('rgbImg');
+const rgbPlaceholder = el('rgbPlaceholder');
+const slamGrid     = el('slamGrid');
+const slamLabel    = el('slamLabel');
+const etLeftCanvas = el('etLeftCanvas');
+const etRightCanvas = el('etRightCanvas');
+const gazeCanvas   = el('gazeCanvas');
+const gazeHint     = el('gazeHint');
+const leftHandCanvas  = el('leftHandCanvas');
+const rightHandCanvas = el('rightHandCanvas');
+const accelCanvas  = el('accelCanvas');
+const gyroCanvas   = el('gyroCanvas');
+const audioCanvas  = el('audioCanvas');
+const audioPlaceholder = el('audioPlaceholder');
+const ppgCanvas    = el('ppgCanvas');
+const ppgPlaceholder = el('ppgPlaceholder');
+const ppgHint      = el('ppgHint');
+const ttsInput     = el('ttsInput');
+const ttsSend      = el('ttsSend');
+const ttsStatus    = el('ttsStatus');
+const audioToggle  = el('audioToggle');
+const audioIconMuted = el('audioIconMuted');
+const audioIconLive  = el('audioIconLive');
+
+/* ── State ── */
+let ws = null;
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+let messagesReceived = 0;
+let fpsCount = 0;
+let fpsLastTime = Date.now();
+let currentFps = 0;
+let isConnected = false;
+
+const blobUrls = { rgb: null, slam: {}, et: {} };
+const slamCanvases = {};   // camera_id -> canvas
+const slamImageRefs = {};  // camera_id -> Image
+let etCamIdsSorted = [];   // populated as ET frames arrive
+const audioHistory = [];
+const ppgHistory = [];
+let lastGaze = { yaw: 0, pitch: 0, depth: 0 };
+let gazeLastNonZeroTs = Date.now();
+
+let audioCtx = null;
+let audioRing = null;
+let audioWritePos = 0;
+let audioReadPos = 0;
+let audioProcessor = null;
+let audioGain = null;
+let audioPlaybackEnabled = false;
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* WebSocket connect with exponential backoff                              */
+/* ──────────────────────────────────────────────────────────────────────── */
+function connect() {
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.binaryType = 'arraybuffer';
+
+    ws.onopen = () => {
+      console.log('✅ Connected to', WS_URL);
+      isConnected = true;
+      reconnectAttempts = 0;
+      setConnDot(true);
+      ws.send(JSON.stringify({ type: 'subscribe', streams: ALL_STREAMS }));
+      console.log('📡 Subscribed:', ALL_STREAMS.join(', '));
+    };
+
+    ws.onmessage = handleMessage;
+
+    ws.onerror = () => { /* suppressed; onclose triggers reconnect */ };
+
+    ws.onclose = () => {
+      isConnected = false;
+      setConnDot(false);
+      ws = null;
+      if (reconnectAttempts < MAX_RECONNECT) {
+        const delay = Math.min(BASE_RECONNECT_MS * Math.pow(1.5, reconnectAttempts), 30000);
+        reconnectAttempts++;
+        if (reconnectAttempts === 1) {
+          console.log('🔌 Disconnected — reconnecting…');
+        } else if (reconnectAttempts % 5 === 0) {
+          console.log(`🔄 Reconnect attempt ${reconnectAttempts}/${MAX_RECONNECT} (next in ${(delay / 1000).toFixed(1)}s)`);
+        }
+        reconnectTimer = setTimeout(connect, delay);
+      } else {
+        console.log(`⏹ Stopped after ${MAX_RECONNECT} attempts. Refresh page to retry.`);
+      }
+    };
+  } catch (e) {
+    console.error('Failed to create WebSocket:', e);
+    if (reconnectAttempts < MAX_RECONNECT) {
+      const delay = Math.min(BASE_RECONNECT_MS * Math.pow(1.5, reconnectAttempts), 30000);
+      reconnectAttempts++;
+      reconnectTimer = setTimeout(connect, delay);
+    }
+  }
+}
+
+function setConnDot(live) {
+  connDot.classList.toggle('live', !!live);
+  connDot.title = live ? 'Live' : 'Disconnected';
+}
+
+function sendMessage(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(obj));
+    return true;
+  }
+  return false;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* Message dispatch                                                         */
+/* ──────────────────────────────────────────────────────────────────────── */
+function handleMessage(event) {
+  try {
+    if (event.data instanceof ArrayBuffer) {
+      handleBinaryFrame(event.data);
+      bumpFps();
+      return;
+    }
+    const m = JSON.parse(event.data);
+    switch (m.type) {
+      case 'rgb_frame':       /* legacy JSON path; we expect binary */ break;
+      case 'vio':             if (m.data) updateVio(m.data); break;
+      case 'eye_gaze':        if (m.data) updateGaze(m.data); break;
+      case 'hand_tracking':   if (m.data) updateHands(m.data); break;
+      case 'imu':             if (m.data) updateImu(m.data); break;
+      case 'audio':           if (m.data) updateAudio(m.data); break;
+      case 'ppg':             if (m.data) updatePpg(m.data); break;
+      case 'device_status':   if (m.data) updateDeviceStatus(m.data); break;
+    }
+    bumpFps();
+  } catch (err) {
+    console.error('WS message error:', err);
+  }
+}
+
+function bumpFps() {
+  messagesReceived++;
+  el('statMsgs').textContent = messagesReceived;
+  fpsCount++;
+  const now = Date.now();
+  if (now - fpsLastTime >= 1000) {
+    currentFps = fpsCount;
+    fpsCount = 0;
+    fpsLastTime = now;
+    el('statFps').textContent = currentFps;
+    const live = isConnected && currentFps > 0;
+    const stat = el('statStatus');
+    stat.textContent = live ? 'Live' : 'Offline';
+    stat.style.color = live ? 'var(--accent-teal)' : 'var(--text-muted)';
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* Binary frame handler (RGB / SLAM / ET)                                   */
+/* ──────────────────────────────────────────────────────────────────────── */
+function handleBinaryFrame(buf) {
+  const view = new Uint8Array(buf);
+  if (view.length < 3) return;
+  const type    = view[0];
+  const idLen   = view[1];
+  const camId   = idLen > 0 ? new TextDecoder().decode(view.slice(2, 2 + idLen)) : '';
+  const jpeg    = view.slice(2 + idLen);
+  const blob    = new Blob([jpeg], { type: 'image/jpeg' });
+  const url     = URL.createObjectURL(blob);
+
+  if (type === BINARY_FRAME_RGB) {
+    if (blobUrls.rgb) URL.revokeObjectURL(blobUrls.rgb);
+    blobUrls.rgb = url;
+    rgbImg.style.display = 'block';
+    rgbPlaceholder.style.display = 'none';
+    rgbImg.src = url;
+  } else if (type === BINARY_FRAME_SLAM) {
+    if (blobUrls.slam[camId]) URL.revokeObjectURL(blobUrls.slam[camId]);
+    blobUrls.slam[camId] = url;
+    ensureSlamCanvas(camId).then(canvas => drawJpegToCanvas(canvas, url));
+    slamLabel.textContent = `SLAM (${Object.keys(slamCanvases).length})`;
+  } else if (type === BINARY_FRAME_ET) {
+    if (blobUrls.et[camId]) URL.revokeObjectURL(blobUrls.et[camId]);
+    blobUrls.et[camId] = url;
+    if (!etCamIdsSorted.includes(camId)) {
+      etCamIdsSorted.push(camId);
+      etCamIdsSorted.sort();
+    }
+    const idx = etCamIdsSorted.indexOf(camId);
+    const canvas = idx === 0 ? etLeftCanvas : etRightCanvas;
+    drawJpegToCanvas(canvas, url, true);
+  }
+}
+
+/* Lazily create one canvas per SLAM camera id and append to the grid. */
+function ensureSlamCanvas(camId) {
+  if (slamCanvases[camId]) return Promise.resolve(slamCanvases[camId]);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'inner frame-43 frame';
+  const canvas = document.createElement('canvas');
+  wrapper.appendChild(canvas);
+  const badge = document.createElement('span');
+  badge.className = 'badge';
+  badge.textContent = String(Object.keys(slamCanvases).length + 1);
+  wrapper.appendChild(badge);
+  slamGrid.appendChild(wrapper);
+  slamCanvases[camId] = canvas;
+  return Promise.resolve(canvas);
+}
+
+function drawJpegToCanvas(canvas, url, fitToCanvasSize) {
+  const img = new Image();
+  img.onload = () => {
+    if (fitToCanvasSize) {
+      // ET cameras render to a fixed-size canvas
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    } else {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+    }
+  };
+  img.src = url;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* JSON updaters                                                            */
+/* ──────────────────────────────────────────────────────────────────────── */
+function updateVio(d) {
+  el('vioX').textContent = d.position?.x?.toFixed(3) ?? '–';
+  el('vioY').textContent = d.position?.y?.toFixed(3) ?? '–';
+  el('vioZ').textContent = d.position?.z?.toFixed(3) ?? '–';
+  el('vioYaw').textContent   = d.euler?.yaw?.toFixed(1)   ?? '–';
+  el('vioPitch').textContent = d.euler?.pitch?.toFixed(1) ?? '–';
+  el('vioRoll').textContent  = d.euler?.roll?.toFixed(1)  ?? '–';
+  el('qW').textContent = d.quaternion?.w?.toFixed(3) ?? '–';
+  el('qX').textContent = d.quaternion?.x?.toFixed(3) ?? '–';
+  el('qY').textContent = d.quaternion?.y?.toFixed(3) ?? '–';
+  el('qZ').textContent = d.quaternion?.z?.toFixed(3) ?? '–';
+}
+
+function updateGaze(d) {
+  lastGaze = d;
+  el('gazeYaw').textContent   = (d.yaw   ?? 0).toFixed(3);
+  el('gazePitch').textContent = (d.pitch ?? 0).toFixed(3);
+  el('gazeDepth').textContent = (d.depth ?? 0).toFixed(2);
+  drawGaze(gazeCanvas, d);
+  if (d.yaw || d.pitch || d.depth) {
+    gazeLastNonZeroTs = Date.now();
+    gazeHint.style.display = 'none';
+  }
+}
+
+function updateHands(d) {
+  if (d.left) {
+    el('leftPlaceholder').style.display = 'none';
+    drawHand(leftHandCanvas, d.left.joints || []);
+    el('leftJointCount').textContent = (d.left.joints?.length || 0);
+    setGesture('left', d.left.gestures);
+  }
+  if (d.right) {
+    el('rightPlaceholder').style.display = 'none';
+    drawHand(rightHandCanvas, d.right.joints || []);
+    el('rightJointCount').textContent = (d.right.joints?.length || 0);
+    setGesture('right', d.right.gestures);
+  }
+}
+
+function setGesture(side, g) {
+  if (!g) return;
+  el(side + 'Pinch').style.display  = g.pinch?.detected     ? 'inline-block' : 'none';
+  el(side + 'Thumbs').style.display = g.thumbsUp?.detected  ? 'inline-block' : 'none';
+  const point = el(side + 'Point');
+  if (g.pointing?.detected) {
+    const dir = g.pointing.debug?.direction;
+    point.textContent = dir === 'up' ? '👆' : dir === 'down' ? '👇' : dir === 'left' ? '👈' : dir === 'right' ? '👉' : '👈';
+    point.style.display = 'inline-block';
+  } else {
+    point.style.display = 'none';
+  }
+}
+
+function updateImu(d) {
+  if (d.accel) {
+    el('accelX').textContent = d.accel.x?.toFixed(2) ?? '–';
+    el('accelY').textContent = d.accel.y?.toFixed(2) ?? '–';
+    el('accelZ').textContent = d.accel.z?.toFixed(2) ?? '–';
+    drawIMU(accelCanvas, d.accel);
+  }
+  if (d.gyro) {
+    el('gyroX').textContent = d.gyro.x?.toFixed(2) ?? '–';
+    el('gyroY').textContent = d.gyro.y?.toFixed(2) ?? '–';
+    el('gyroZ').textContent = d.gyro.z?.toFixed(2) ?? '–';
+    drawIMU(gyroCanvas, d.gyro);
+  }
+}
+
+function updateAudio(d) {
+  audioPlaceholder.style.display = 'none';
+  // Push level sample to history for waveform
+  let level = d.level ?? d.amplitude ?? d.rms;
+  if (level == null) level = 0;
+  level = Math.min(1, Math.max(-1, level));
+  audioHistory.push(level);
+  if (audioHistory.length > AUDIO_HISTORY_MAX) audioHistory.shift();
+  drawAudioWaveform();
+
+  // If playback is enabled, write samples directly into the ring buffer.
+  if (audioPlaybackEnabled && d.samples) {
+    writeAudioSamples(d);
+  }
+}
+
+function updatePpg(d) {
+  ppgPlaceholder.style.display = 'none';
+  if (typeof d.value === 'number') {
+    ppgHistory.push(d.value);
+    if (ppgHistory.length > PPG_HISTORY_MAX) ppgHistory.shift();
+    drawPpgWaveform();
+    ppgHint.style.display = (d.value < 50000) ? 'block' : 'none';
+  }
+  el('ppgBpm').textContent = d.heart_rate != null ? d.heart_rate.toFixed(0) : '--';
+  el('ppgRaw').textContent = d.value      != null ? d.value.toFixed(0)      : '--';
+}
+
+function updateDeviceStatus(d) {
+  el('dsName').textContent = d.serial || (isConnected ? 'Aria Gen2' : 'No device');
+  const dsConn = el('dsConn');
+  dsConn.textContent = isConnected ? 'Connected' : 'Disconnected';
+  dsConn.classList.toggle('live', isConnected);
+
+  // Battery
+  const fill = el('dsBatteryFill');
+  const txt  = el('dsBatteryText');
+  if (d.battery_level != null) {
+    const lvl = Math.max(0, Math.min(100, d.battery_level));
+    fill.setAttribute('width', String((lvl / 100) * 21));
+    txt.textContent = String(lvl);
+  } else {
+    fill.setAttribute('width', '0');
+    txt.textContent = '—';
+  }
+
+  // Wifi
+  el('dsWifi').style.color = (d.wifi_connected || isConnected) ? 'var(--bg-topbar)' : 'var(--text-muted)';
+
+  // Temperature
+  const tempEl = el('dsTemp');
+  tempEl.classList.remove('warm', 'hot');
+  if (d.skin_temp_celsius != null) {
+    tempEl.textContent = `${d.skin_temp_celsius.toFixed(1)}°`;
+    if (d.skin_temp_celsius > 40)      tempEl.classList.add('hot');
+    else if (d.skin_temp_celsius > 38) tempEl.classList.add('warm');
+  } else {
+    tempEl.textContent = isConnected ? '—°' : '';
+  }
+}
+
+/* Periodically check whether to show the gaze hint (after 5s of no gaze). */
+setInterval(() => {
+  if (Date.now() - gazeLastNonZeroTs >= GAZE_HINT_DELAY_MS) {
+    gazeHint.style.display = 'block';
+  }
+}, 1000);
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* Audio playback ring buffer (Web Audio API)                              */
+/* ──────────────────────────────────────────────────────────────────────── */
+audioToggle.addEventListener('click', () => {
+  audioPlaybackEnabled = !audioPlaybackEnabled;
+  audioToggle.classList.toggle('active', audioPlaybackEnabled);
+  audioToggle.title = audioPlaybackEnabled ? 'Mute audio' : 'Play audio';
+  audioIconMuted.style.display = audioPlaybackEnabled ? 'none' : 'block';
+  audioIconLive.style.display  = audioPlaybackEnabled ? 'block' : 'none';
+  if (!audioPlaybackEnabled) teardownAudio();
+});
+
+function teardownAudio() {
+  if (audioProcessor) {
+    audioProcessor.disconnect();
+    audioProcessor.onaudioprocess = null;
+    audioProcessor = null;
+  }
+  if (audioGain) { audioGain.disconnect(); audioGain = null; }
+  if (audioCtx)  { audioCtx.close(); audioCtx = null; }
+  audioRing = null;
+  audioWritePos = 0;
+  audioReadPos = 0;
+}
+
+function writeAudioSamples(audioMsg) {
+  if (!audioCtx) {
+    const sampleRate = audioMsg.sample_rate || 48000;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
+    audioRing = new Float32Array(RING_BUFFER_SIZE);
+    audioWritePos = 0;
+    audioReadPos  = 0;
+
+    audioProcessor = audioCtx.createScriptProcessor(2048, 1, 1);
+    audioGain = audioCtx.createGain();
+    audioGain.gain.value = 2.0;
+
+    audioProcessor.onaudioprocess = (e) => {
+      const out = e.outputBuffer.getChannelData(0);
+      const ring = audioRing;
+      if (!ring) { out.fill(0); return; }
+      let rp = audioReadPos;
+      const wp = audioWritePos;
+      const ringLen = ring.length;
+      for (let i = 0; i < out.length; i++) {
+        if (rp !== wp) {
+          out[i] = ring[rp];
+          rp = (rp + 1) % ringLen;
+        } else {
+          out[i] = 0;
+        }
+      }
+      audioReadPos = rp;
+    };
+
+    audioProcessor.connect(audioGain);
+    audioGain.connect(audioCtx.destination);
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  try {
+    const binStr = atob(audioMsg.samples);
+    const bytes = new Uint8Array(binStr.length);
+    for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+    const f32 = new Float32Array(bytes.buffer);
+    if (f32.length === 0) return;
+    let wp = audioWritePos;
+    const ringLen = audioRing.length;
+    for (let i = 0; i < f32.length; i++) {
+      audioRing[wp] = f32[i];
+      wp = (wp + 1) % ringLen;
+    }
+    audioWritePos = wp;
+  } catch (err) {
+    console.warn('Audio write error:', err);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* TTS UI                                                                    */
+/* ──────────────────────────────────────────────────────────────────────── */
+ttsInput.addEventListener('input', () => {
+  ttsInput.style.height = 'auto';
+  ttsInput.style.height = Math.min(ttsInput.scrollHeight, 80) + 'px';
+  ttsSend.disabled = !ttsInput.value.trim();
+});
+
+ttsInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && ttsInput.value.trim()) {
+    e.preventDefault();
+    submitTts(ttsInput.value.trim(), true);
+  }
+});
+
+ttsSend.addEventListener('click', () => {
+  const t = ttsInput.value.trim();
+  if (t) submitTts(t, true);
+});
+
+document.querySelectorAll('.quick-btn').forEach((btn) => {
+  btn.addEventListener('click', () => submitTts(btn.dataset.tts, false));
+});
+
+function submitTts(text, clearInput) {
+  const ok = sendMessage({ type: 'tts', text });
+  ttsStatus.style.display = 'block';
+  ttsStatus.classList.toggle('error', !ok);
+  ttsStatus.textContent = ok ? '✓ Sent to Aria glasses' : '✗ Failed — WebSocket not connected';
+  if (ok && clearInput) {
+    ttsInput.value = '';
+    ttsInput.style.height = '18px';
+    ttsSend.disabled = true;
+  }
+  setTimeout(() => { ttsStatus.style.display = 'none'; }, 2000);
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* Canvas drawing helpers (ported verbatim from StreamPanel.jsx)            */
+/* ──────────────────────────────────────────────────────────────────────── */
+function drawHand(canvas, joints) {
+  if (!joints || joints.length === 0) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  joints.forEach(j => {
+    const { x, y } = j.position;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  });
+  const pad = 15, rX = maxX - minX || 1, rY = maxY - minY || 1;
+
+  const conns = [[5,6],[6,7],[7,0],[5,8],[8,9],[9,10],[10,1],[5,11],[11,12],[12,13],[13,2],
+    [5,14],[14,15],[15,16],[16,3],[5,17],[17,18],[18,19],[19,4],[6,8],[8,11],[11,14],[14,17]];
+  ctx.strokeStyle = 'rgba(24, 238, 212, 0.35)';
+  ctx.lineWidth = 3;
+  conns.forEach(([a, b]) => {
+    if (a < joints.length && b < joints.length) {
+      const x1 = w - pad - ((joints[a].position.x - minX) / rX) * (w - 2 * pad);
+      const y1 = h - pad - ((joints[a].position.y - minY) / rY) * (h - 2 * pad);
+      const x2 = w - pad - ((joints[b].position.x - minX) / rX) * (w - 2 * pad);
+      const y2 = h - pad - ((joints[b].position.y - minY) / rY) * (h - 2 * pad);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+  });
+
+  joints.forEach((j, i) => {
+    if (i === 20) return;
+    const cx = w - pad - ((j.position.x - minX) / rX) * (w - 2 * pad);
+    const cy = h - pad - ((j.position.y - minY) / rY) * (h - 2 * pad);
+    ctx.beginPath(); ctx.arc(cx, cy, i <= 4 ? 6 : 5, 0, Math.PI * 2);
+    ctx.fillStyle = i <= 4 ? '#18EED4' : '#0064E0';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 0.5; ctx.stroke();
+  });
+}
+
+function drawGaze(canvas, gaze) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+
+  const x = w / 2 - (gaze.yaw   || 0) * w * 0.8;
+  const y = h / 2 - (gaze.pitch || 0) * h * 0.8;
+  ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#18EED4'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(24, 238, 212, 0.3)'; ctx.lineWidth = 2; ctx.stroke();
+}
+
+function drawIMU(canvas, vec) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h / 2;
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(15, cy); ctx.lineTo(w - 15, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, 15); ctx.lineTo(cx, h - 15); ctx.stroke();
+
+  const maxC = Math.max(Math.abs(vec.x), Math.abs(vec.y), Math.abs(vec.z), 0.01);
+  const maxLen = Math.min(w, h) * 0.38;
+  const s = maxLen / maxC;
+
+  if (vec.x !== 0) drawArrow(ctx, cx, cy, cx + vec.x * s, cy, '#ef4444');
+  if (vec.y !== 0) drawArrow(ctx, cx, cy, cx, cy - vec.y * s, '#22c55e');
+  if (vec.z !== 0) {
+    const zLen = vec.z * s;
+    drawArrow(ctx, cx, cy, cx + zLen * 0.707, cy - zLen * 0.707, '#3b82f6');
+  }
+
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawArrow(ctx, x1, y1, x2, y2, color) {
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath(); ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 7 * Math.cos(a - 0.5), y2 - 7 * Math.sin(a - 0.5));
+  ctx.lineTo(x2 - 7 * Math.cos(a + 0.5), y2 - 7 * Math.sin(a + 0.5));
+  ctx.closePath(); ctx.fill();
+}
+
+function drawAudioWaveform() {
+  const canvas = audioCanvas;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.lineWidth = 1;
+  for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+  for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+
+  const history = audioHistory;
+  if (history.length < 2) return;
+
+  const stepX = w / (history.length - 1);
+  ctx.strokeStyle = '#18EED4';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#18EED4';
+  ctx.shadowBlur = 4;
+  ctx.beginPath();
+  history.forEach((val, i) => {
+    const x = i * stepX;
+    const y = h / 2 - val * (h * 0.4);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  const lastX = (history.length - 1) * stepX;
+  const lastY = h / 2 - history[history.length - 1] * (h * 0.4);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+  ctx.fillStyle = '#18EED4'; ctx.fill();
+  ctx.beginPath(); ctx.arc(lastX, lastY, 7, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(24, 238, 212, 0.3)'; ctx.lineWidth = 2; ctx.stroke();
+}
+
+function drawPpgWaveform() {
+  const canvas = ppgCanvas;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+
+  if (ppgHistory.length < 2) return;
+  const minVal = Math.min.apply(null, ppgHistory);
+  const maxVal = Math.max.apply(null, ppgHistory);
+  const range = (maxVal - minVal) || 1;
+
+  const stepX = w / (ppgHistory.length - 1);
+  ctx.strokeStyle = '#f87171';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ppgHistory.forEach((val, i) => {
+    const x = i * stepX;
+    const normalized = (val - minVal) / range;
+    const y = h - (normalized * h * 0.8 + h * 0.1);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* Cleanup on unload                                                        */
+/* ──────────────────────────────────────────────────────────────────────── */
+window.addEventListener('beforeunload', () => {
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (ws) try { ws.close(); } catch (e) { /* noop */ }
+  if (blobUrls.rgb) URL.revokeObjectURL(blobUrls.rgb);
+  Object.values(blobUrls.slam).forEach(u => u && URL.revokeObjectURL(u));
+  Object.values(blobUrls.et).forEach(u => u && URL.revokeObjectURL(u));
+  teardownAudio();
+});
+
+/* ── Boot ── */
+connect();
+</script>
+
+</body>
+</html>

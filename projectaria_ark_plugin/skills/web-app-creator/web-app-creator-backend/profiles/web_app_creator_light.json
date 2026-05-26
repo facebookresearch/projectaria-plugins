@@ -1,0 +1,47 @@
+{
+  "name": "web_app_creator_light",
+  "description": "Web App Creator Light — VIO, hands, gaze, audio, RGB, PPG (low-latency, no raw SLAM/ET cameras)",
+
+  "imus": {
+    "rate_hz": 100
+  },
+  "audio": {
+    "sample_rate": "R_16KHZ",
+    "frame_period": "P_20MS",
+    "sample_format": "S16",
+    "encoding_format": "OPUS",
+    "opus_config": {
+      "complexity": 10,
+      "bitrate": 256000
+    }
+  },
+  "rgb_camera": {
+    "rate_hz": 10,
+    "auto_exposure": {},
+    "encoding": "H265",
+    "video_config": {
+      "iframe_period": 30,
+      "cqp": {
+        "qp": 30
+      }
+    }
+  },
+  "et": {
+    "rate_hz": 30
+  },
+  "ht": {
+    "rate_hz": 10
+  },
+  "vio": {
+    "rate_hz": 10
+  },
+  "ppg": {
+    "rate_hz": 128
+  },
+  "temperature": {
+    "rate_hz": 1
+  },
+  "device_info": {
+    "period_ms": 10000
+  }
+}

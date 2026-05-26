@@ -1,0 +1,13 @@
+# Web App Creator Backend — Python Dependencies
+# =========================================
+
+# Project Aria Client SDK (provides aria.sdk_gen2, aria.stream_receiver, aria_gen2 CLI)
+# PINNED: versions >2.2.0 have broken aria_gen2 CLI (ModuleNotFoundError: _version)
+projectaria-client-sdk==2.2.0
+
+# WebSocket server (used by backend/websocket_bridge.py)
+websockets>=12.0
+
+# Data processing (sensor arrays + JPEG encoding)
+numpy>=1.24.0
+opencv-python>=4.9.0

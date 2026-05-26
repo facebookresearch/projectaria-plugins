@@ -1,0 +1,21 @@
+# yamllint configuration.
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  document-start:
+    present: false
+  truthy:
+    # GitHub Actions uses `on:` which yamllint thinks is truthy.
+    check-keys: false
+  comments:
+    min-spaces-from-content: 1
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+
+ignore: |
+  node_modules/
+  .lycheecache

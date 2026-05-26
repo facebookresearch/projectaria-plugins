@@ -1,0 +1,19 @@
+# Default code owners for this repository.
+# Anyone listed here is automatically requested for review on PRs that
+# touch matching files.
+#
+# Syntax reference: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+
+# Catch-all — Project Aria team owns everything by default.
+*                                @facebookresearch/project-aria
+
+# Marketplace manifest & plugin manifests are critical — require Aria team.
+/.claude-plugin/                  @facebookresearch/project-aria
+**/.claude-plugin/                @facebookresearch/project-aria
+
+# CI and repo hygiene.
+/.github/                         @facebookresearch/project-aria
+/scripts/                         @facebookresearch/project-aria
+
+# Each plugin folder can later override its own owners.
+/projectaria_ark_plugin/          @facebookresearch/project-aria

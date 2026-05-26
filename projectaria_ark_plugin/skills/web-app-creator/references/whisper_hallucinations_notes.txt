@@ -1,0 +1,41 @@
+Common English Whisper hallucination phrases (from HuggingFace dataset + community reports):
+- thanks for watching
+- thank you for watching
+- bye
+- you
+- subscribe
+- please subscribe
+- like and subscribe
+- please like and subscribe
+- click the bell
+- leave a comment
+- see you next time
+- see you in the next video
+- thank you
+- thanks
+- please leave a comment
+- please see the description
+- check the description
+- link in the description
+- thumbs up
+- click the thumbs up
+- please use headphones or earphones
+- turn on the subscription
+- thank you for watching and see you in the next video
+- please post them in the comments
+- if you like this video
+- further details and more at
+- please turn on
+- alarm settings
+- bell icon
+- notified when a new video is uploaded
+- he doesn't want to talk to you
+- Aria is over
+- please see review
+- thank you for your support
+
+Also common patterns:
+- Very short phrases (1-2 words)
+- YouTube-style call-to-action phrases
+- Repetitive/looping text
+- Text containing "subscribe", "comment", "like", "watch", "video", "channel"

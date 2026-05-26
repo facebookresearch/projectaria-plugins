@@ -1,0 +1,61 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  json-schema:
+    name: JSON schema validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install validation deps
+        run: pip install -r scripts/requirements.txt
+
+      - name: Validate marketplace.json + plugin.json
+        run: python scripts/validate_marketplace.py
+
+  skills:
+    name: Skill frontmatter validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install validation deps
+        run: pip install -r scripts/requirements.txt
+
+      - name: Validate every SKILL.md
+        run: python scripts/validate_skills.py
+
+  repo-hygiene:
+    name: Required OSS files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check README, LICENSE, CONTRIBUTING, etc. exist
+        run: python scripts/check_required_files.py

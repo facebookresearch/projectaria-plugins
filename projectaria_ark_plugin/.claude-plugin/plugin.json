@@ -1,0 +1,8 @@
+{
+  "name": "aria-ark",
+  "description": "Aria Research Kit (ARK) skills for building applications with Project Aria smart glasses. Covers data processing (VRS, MPS, calibration) and real-time webapp development (WebSocket streaming, 3D visualization, voice pipeline).",
+  "version": "1.0.0",
+  "author": {
+    "name": "Project Aria Team"
+  }
+}

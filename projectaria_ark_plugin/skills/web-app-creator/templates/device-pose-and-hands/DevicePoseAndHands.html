@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web App Creator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F7F5F2;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;position:relative;width:100vw;height:100vh}
+#container{position:fixed;top:0;left:0;width:100vw;height:100vh}
+#welcome{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:1;opacity:1;transition:opacity 1.5s ease-out}
+#hud{position:fixed;bottom:12px;left:12px;color:#67788A;font-size:11px;pointer-events:none;z-index:2}
+#hint{position:fixed;bottom:12px;right:12px;color:#67788A;font-size:11px;pointer-events:none;z-index:2}
+#axes{position:fixed;bottom:30px;left:30px;width:80px;height:80px;pointer-events:none;z-index:2}
+
+/* Developer panel */
+#dev-btn{position:fixed;top:12px;right:12px;width:28px;height:28px;border:1px solid rgba(103,120,138,0.1);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(247,245,242,0.45);backdrop-filter:blur(8px);z-index:100;transition:all 0.2s}
+#dev-btn:hover{background:rgba(247,245,242,0.7)}
+#dev-btn svg{width:14px;height:14px;stroke:#9BA8B4}
+#dev-panel{position:fixed;top:48px;right:12px;width:260px;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.12);padding:12px;z-index:100;display:none;max-height:80vh;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+#dev-panel::-webkit-scrollbar{display:none}
+#dev-panel.open{display:block}
+#dev-panel h4{font-size:11px;font-weight:600;color:#1C2B33;margin:0 0 10px 0;padding-bottom:6px;border-bottom:1px solid rgba(103,120,138,0.1)}
+.dev-section{margin-bottom:12px}
+.dev-section-title{font-size:9px;font-weight:600;color:#2C0D00;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.dev-section-content{background:#F7F5F2;border-radius:12px;padding:10px}
+.dev-row{margin-bottom:10px}
+.dev-row label{display:flex;justify-content:space-between;font-size:10px;color:#67788A;margin-bottom:4px}
+.dev-row label span{color:#1C2B33;font-weight:500}
+.dev-row input[type="range"]{width:100%;height:4px;-webkit-appearance:none;background:#E8E6E3;border-radius:2px;outline:none}
+.dev-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:#18EED4;border-radius:50%;cursor:pointer}
+.dev-row.toggle-row{display:flex;justify-content:space-between;align-items:center}
+.dev-row.toggle-row label:first-child{margin-bottom:0}
+.dev-toggle{display:flex;align-items:center;cursor:pointer}
+.dev-toggle input{display:none}
+.dev-toggle .toggle-track{width:24px;height:14px;background:#D0D5DA;border-radius:7px;position:relative;transition:background 0.3s}
+.dev-toggle input:checked+.toggle-track{background:#18EED4}
+.dev-toggle .toggle-track::after{content:'';position:absolute;width:10px;height:10px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform 0.3s}
+.dev-toggle input:checked+.toggle-track::after{transform:translateX(10px)}
+.vio-data{font-family:monospace;font-size:9px;color:#67788A;background:#f5f5f5;padding:8px;border-radius:4px;margin-top:8px}
+.vio-data .label{color:#9BA8B4;font-weight:600}
+.vio-data .value{color:#1C2B33}
+
+/* Style selector UI */
+#style-selector{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;z-index:100}
+.style-btn{padding:0;border:none;background:transparent;font-size:11px;font-weight:400;cursor:pointer;transition:all 0.3s;color:#67788A;line-height:1}
+.style-btn:hover{color:#4A5A6A}
+.style-btn.active{color:#18EED4;font-weight:500}
+.auto-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;color:#67788A;margin-left:10px;line-height:1}
+.auto-toggle input{display:none}
+.auto-toggle .toggle-track{width:24px;height:14px;background:#D0D5DA;border-radius:7px;position:relative;transition:background 0.3s}
+.auto-toggle input:checked+.toggle-track{background:#18EED4}
+.auto-toggle .toggle-track::after{content:'';position:absolute;width:10px;height:10px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform 0.3s}
+.auto-toggle input:checked+.toggle-track::after{transform:translateX(10px)}
+.auto-toggle span{transition:color 0.3s}
+/* FP toggle reuses the .dev-toggle / .toggle-track switch pattern (same as Cycle). */
+.text-red-400 { color: #f87171; }
+.text-green-400 { color: #4ade80; }
+.text-blue-400 { color: #60a5fa; }
+.color-btn{width:20px;height:20px;border-radius:4px;border:none;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s}
+.color-btn:hover{transform:scale(1.15)}
+.color-btn.active{box-shadow:0 0 0 2px #fff,0 0 0 4px #18EED4}
+</style>
+</head>
+<body>
+<div id="container"></div>
+<div id="welcome">
+  <img src="./aria-icon-dark.png" alt="Web App Creator" style="height:36px;object-fit:contain;">
+</div>
+<div id="hud">Camera: Y0° P0° D0.15</div>
+<div id="hint">Drag to rotate · Scroll to zoom</div>
+<canvas id="axes"></canvas>
+
+<!-- Developer Panel -->
+<button id="dev-btn">
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"></circle>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+  </svg>
+</button>
+<div id="dev-panel">
+    <h4>Developer Settings</h4>
+
+  <!-- VIO Pipeline Debug Display (Simplified) -->
+  <div class="dev-section">
+    <div class="dev-section-title">Device Pose (VIO)</div>
+    <div class="dev-section-content" style="font-size:10px;color:#67788A;">
+      <div id="vio-debug">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div class="dev-row">
+            <label>Position</label>
+            <div><span style="color:#f87171;">X:</span> <span id="final-pos-x">0.000</span></div>
+            <div><span style="color:#4ade80;">Y:</span> <span id="final-pos-y">0.000</span></div>
+            <div><span style="color:#60a5fa;">Z:</span> <span id="final-pos-z">0.000</span></div>
+          </div>
+          <div class="dev-row">
+            <label>Euler (°)</label>
+            <div><span style="color:#4ade80;">Yaw:</span> <span id="final-yaw">0.0</span></div>
+            <div><span style="color:#f87171;">Pitch:</span> <span id="final-pitch">0.0</span></div>
+            <div><span style="color:#60a5fa;">Roll:</span> <span id="final-roll">0.0</span></div>
+          </div>
+        </div>
+        <div style="padding-top:8px;border-top:1px dashed #D0D5DA;">
+          <div class="dev-row">
+            <label>T_device_cpf (<span id="cpf-source">hardcoded</span>)</label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+            <div>
+              <div><span style="color:#f87171;">X:</span> <span id="cpf-pos-x">0</span></div>
+              <div><span style="color:#4ade80;">Y:</span> <span id="cpf-pos-y">0</span></div>
+              <div><span style="color:#60a5fa;">Z:</span> <span id="cpf-pos-z">0</span></div>
+            </div>
+            <div>
+              <div><span style="color:#c084fc;">W:</span> <span id="cpf-quat-w">1</span></div>
+              <div><span style="color:#f87171;">X:</span> <span id="cpf-quat-x">0</span></div>
+              <div><span style="color:#4ade80;">Y:</span> <span id="cpf-quat-y">0</span></div>
+              <div><span style="color:#60a5fa;">Z:</span> <span id="cpf-quat-z">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gesture - Joint Selector for Pinch Detection -->
+  <div class="dev-section">
+    <div class="dev-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>Gesture</span>
+      <select id="hand-select" style="font-size:10px;padding:2px 4px;border-radius:3px;border:1px solid #D0D5DA;background:#fff;">
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+      </select>
+    </div>
+    <div class="dev-section-content" style="font-size:10px;color:#67788A;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <!-- Joint 1 -->
+        <div class="dev-row">
+          <label>Joint 1</label>
+          <select id="joint1-select" style="width:100%;font-size:10px;padding:2px;border-radius:3px;border:1px solid #D0D5DA;background:#fff;margin:4px 0;">
+            <option value="0">THUMB_TIP</option>
+            <option value="1">INDEX_TIP</option>
+            <option value="2">MIDDLE_TIP</option>
+            <option value="3">RING_TIP</option>
+            <option value="4">PINKY_TIP</option>
+            <option value="5">WRIST</option>
+            <option value="6">THUMB_IP</option>
+            <option value="7">THUMB_MCP</option>
+            <option value="8">INDEX_PIP</option>
+            <option value="9">INDEX_DIP</option>
+            <option value="10">INDEX_MCP</option>
+            <option value="11">MIDDLE_PIP</option>
+            <option value="12">MIDDLE_DIP</option>
+            <option value="13">MIDDLE_MCP</option>
+            <option value="14">RING_PIP</option>
+            <option value="15">RING_DIP</option>
+            <option value="16">RING_MCP</option>
+            <option value="17">PINKY_PIP</option>
+            <option value="18">PINKY_DIP</option>
+            <option value="19">PINKY_MCP</option>
+            <option value="20">PALM</option>
+          </select>
+          <div><span style="color:#f87171;">X:</span> <span id="joint1-x">0.000</span></div>
+          <div><span style="color:#4ade80;">Y:</span> <span id="joint1-y">0.000</span></div>
+          <div><span style="color:#60a5fa;">Z:</span> <span id="joint1-z">0.000</span></div>
+        </div>
+
+        <!-- Joint 2 -->
+        <div class="dev-row">
+          <label>Joint 2</label>
+          <select id="joint2-select" style="width:100%;font-size:10px;padding:2px;border-radius:3px;border:1px solid #D0D5DA;background:#fff;margin:4px 0;">
+            <option value="0">THUMB_TIP</option>
+            <option value="1" selected>INDEX_TIP</option>
+            <option value="2">MIDDLE_TIP</option>
+            <option value="3">RING_TIP</option>
+            <option value="4">PINKY_TIP</option>
+            <option value="5">WRIST</option>
+            <option value="6">THUMB_IP</option>
+            <option value="7">THUMB_MCP</option>
+            <option value="8">INDEX_PIP</option>
+            <option value="9">INDEX_DIP</option>
+            <option value="10">INDEX_MCP</option>
+            <option value="11">MIDDLE_PIP</option>
+            <option value="12">MIDDLE_DIP</option>
+            <option value="13">MIDDLE_MCP</option>
+            <option value="14">RING_PIP</option>
+            <option value="15">RING_DIP</option>
+            <option value="16">RING_MCP</option>
+            <option value="17">PINKY_PIP</option>
+            <option value="18">PINKY_DIP</option>
+            <option value="19">PINKY_MCP</option>
+            <option value="20">PALM</option>
+          </select>
+          <div><span style="color:#f87171;">X:</span> <span id="joint2-x">0.000</span></div>
+          <div><span style="color:#4ade80;">Y:</span> <span id="joint2-y">0.000</span></div>
+          <div><span style="color:#60a5fa;">Z:</span> <span id="joint2-z">0.000</span></div>
+        </div>
+      </div>
+
+      <!-- Distance Display -->
+      <div class="dev-row" style="padding-top:8px;border-top:1px dashed #D0D5DA;">
+        <label>Pinch Distance</label>
+        <div><span id="joint-distance">0.000</span> m <span id="pinch-indicator"></span></div>
+        <div style="color:#67788A;font-size:9px;margin-top:2px;">threshold: ~0.02-0.03m</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIO Debug Display -->
+  <div class="dev-section">
+    <div class="dev-section-title">Grid</div>
+    <div class="dev-section-content">
+      <div class="dev-row">
+        <label>Grid Size <span id="gridSize-val" style="color:#1C2B33;font-weight:500;">0.10</span></label>
+        <input type="range" id="gridSize" min="0.05" max="0.5" step="0.01" value="0.10">
+      </div>
+      <div class="dev-row">
+        <label>Line Width <span id="lineWidth-val" style="color:#1C2B33;font-weight:500;">0.010</span></label>
+        <input type="range" id="lineWidth" min="0.002" max="0.03" step="0.001" value="0.010">
+      </div>
+      <div class="dev-row">
+        <label>Fade Start <span id="fadeRadius-val" style="color:#1C2B33;font-weight:500;">0.5</span></label>
+      <input type="range" id="fadeRadius" min="0.5" max="5" step="0.1" value="0.5">
+    </div>
+    <div class="dev-row">
+      <label>Fade End <span id="maxRadius-val" style="color:#1C2B33;font-weight:500;">2.0</span></label>
+      <input type="range" id="maxRadius" min="1" max="8" step="0.1" value="2.0">
+    </div>
+    <div class="dev-row">
+      <label>Grid Opacity <span id="gridOpacity-val" style="color:#1C2B33;font-weight:500;">0.35</span></label>
+      <input type="range" id="gridOpacity" min="0.1" max="1" step="0.05" value="0.35">
+    </div>
+    <div class="dev-row">
+      <label>Grid Height <span id="gridHeight-val" style="color:#1C2B33;font-weight:500;">-0.50</span></label>
+      <input type="range" id="gridHeight" min="-2" max="1" step="0.05" value="-0.50">
+    </div>
+    </div>
+  </div>
+  <div class="dev-section">
+    <div class="dev-section-title">Controls</div>
+    <div class="dev-section-content">
+      <div class="dev-row toggle-row">
+        <label>Flip Rotate</label>
+        <label class="dev-toggle"><input type="checkbox" id="flipRotate" checked><div class="toggle-track"></div></label>
+      </div>
+      <div class="dev-row toggle-row">
+        <label>Flip Scroll</label>
+        <label class="dev-toggle"><input type="checkbox" id="flipScroll"><div class="toggle-track"></div></label>
+      </div>
+      <div class="dev-row toggle-row">
+        <label>Show 3D Axes</label>
+        <label class="dev-toggle"><input type="checkbox" id="show3DAxes"><div class="toggle-track"></div></label>
+      </div>
+      <div class="dev-row toggle-row">
+        <label>Auto Camera Fit</label>
+        <label class="dev-toggle"><input type="checkbox" id="autoCameraFit" checked><div class="toggle-track"></div></label>
+      </div>
+    </div>
+  </div>
+  <div class="dev-section">
+    <div class="dev-section-title">Appearance</div>
+    <div class="dev-section-content">
+      <div class="dev-row">
+        <label>Base Color</label>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+          <!-- Aria Colors -->
+          <button class="color-btn" data-color="#18EED4" style="background:#18EED4;" title="Aria Teal"></button>
+          <button class="color-btn" data-color="#0064E0" style="background:#0064E0;" title="Aria Blue"></button>
+          <button class="color-btn" data-color="#0C292F" style="background:#0C292F;" title="Dark Teal"></button>
+          <button class="color-btn" data-color="#1C2B33" style="background:#1C2B33;" title="Dark Blue Gray"></button>
+          <button class="color-btn" data-color="#67788A" style="background:#67788A;" title="Cool Gray"></button>
+          <button class="color-btn" data-color="#3889EA" style="background:#3889EA;" title="Link Blue"></button>
+          <button class="color-btn" data-color="#F7F5F2" style="background:#F7F5F2;border:1px solid #ccc;" title="Off White"></button>
+          <button class="color-btn" data-color="#2C0D00" style="background:#2C0D00;" title="Deep Brown"></button>
+          <!-- Common Colors -->
+          <button class="color-btn" data-color="#FF5733" style="background:#FF5733;" title="Orange Red"></button>
+          <button class="color-btn" data-color="#FF9500" style="background:#FF9500;" title="Orange"></button>
+          <button class="color-btn" data-color="#FFCC00" style="background:#FFCC00;" title="Yellow"></button>
+          <button class="color-btn" data-color="#34C759" style="background:#34C759;" title="Green"></button>
+          <button class="color-btn" data-color="#5856D6" style="background:#5856D6;" title="Purple"></button>
+          <button class="color-btn" data-color="#AF52DE" style="background:#AF52DE;" title="Violet"></button>
+          <button class="color-btn" data-color="#FF2D55" style="background:#FF2D55;" title="Pink"></button>
+          <button class="color-btn" data-color="#000000" style="background:#000000;" title="Black"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+<script>
+(function(){
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // COORDINATE SYSTEM REFERENCE (from NebulaSDKSolution.md & websocket_bridge.py)
+  // ═══════════════════════════════════════════════════════════════════════════════
+  //
+  // VIO DATA FROM BACKEND:
+  // - Position: Already transformed by P matrix in backend
+  //   P = [[0,1,0],[0,0,1],[-1,0,0]] => Web X=r1, Web Y=r2, Web Z=-r0
+  //   This maps: Raw Y → Web X, Raw Z → Web Y, -Raw X → Web Z
+  //
+  // - Quaternion: RAW relative quaternion in odometry frame
+  //   Frontend must apply: R_web = P × R_raw × P^T
+  //
+  // Three.js coordinate system (Y-up, right-handed):
+  //       +Y (up)
+  //        │
+  //        │
+  //        └───── +X (right)
+  //       /
+  //      /
+  //    +Z (toward viewer)
+  //
+  // IMPORTANT: The P × R × P^T transformation handles the coordinate system
+  // change from Surreal odometry frame to Three.js web frame, including
+  // the handedness change (det(P) = -1).
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // DEVICE POSE UTILITIES
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // Backend now handles complete VIO pipeline (per StepByStep.md):
+  //   Step 1: T_odometry_device = T_odometry_bodyImu × T_bodyImu_device
+  //   Step 2: Gravity alignment (FromToRotation)
+  //   Step 3: Coordinate conversion (Surreal Z-up → Web Y-up)
+  //
+  // Frontend receives position and quaternion already in Web/Three.js coordinates.
+  // We just need to apply them directly to the device group.
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  // Extract Euler angles from quaternion (for debug display)
+  function quaternionToEulerDegrees(q) {
+    const euler = new THREE.Euler().setFromQuaternion(q, 'YXZ');
+    return {
+      pitch: THREE.MathUtils.radToDeg(euler.x),
+      yaw: THREE.MathUtils.radToDeg(euler.y),
+      roll: THREE.MathUtils.radToDeg(euler.z)
+    };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // SHARED STATE
+  // ═══════════════════════════════════════════════════════════════════════════════
+  let vioData = null;
+  let handData = null;
+  let currentStyle = 'hologram';
+  const TEAL = 0x18EED4;
+  const GRAY = 0x67788A;
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // THREE.JS SCENE SETUP
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xF7F5F2);
+
+  const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.001, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  document.getElementById('container').appendChild(renderer.domElement);
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  mainLight.position.set(5, 10, 7);
+  scene.add(mainLight);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+  fillLight.position.set(-5, 5, -5);
+  scene.add(fillLight);
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ORBIT CAMERA CONTROLS
+  // ═══════════════════════════════════════════════════════════════════════════════
+  let camYaw = 65, camPitch = 30, camDist = 0.53;
+  let targetPos = new THREE.Vector3(0, 0, 0);
+  let dragging = false;
+  let flipRotate = true;
+  let flipScroll = false;
+  let show3DAxes = false;
+  let autoCameraFitEnabled = true;
+  let lastAutoCameraFitTime = 0;
+  let baseColor = 0x18EED4;  // Default teal color
+
+  // ── First-person / third-person camera mode ─────────────────────────────────
+  // '3P' (default): existing orbit-controls behaviour.
+  // 'FP': camera sits at the device pose and looks along the device's local
+  //      forward axis. Mouse drag is ignored; mouse wheel still adjusts FOV.
+  // The choice is persisted in localStorage so it survives page reloads.
+  // Camera mode always starts in 3P on page load. The user can toggle to FP
+  // via the bottom-bar switch, but reloading the page resets back to 3P
+  // (we intentionally do NOT persist the choice in localStorage).
+  let cameraMode = '3P';
+  // Reusable scratch vector/quaternion for the per-frame FP camera update.
+  const _fpScratchVec = new THREE.Vector3();
+  const _fpScratchQuat = new THREE.Quaternion();
+  // FP camera "forward" offset in deviceGroup local space. -Z is the Three.js
+  // camera-forward convention; the visible OBJ wrapper has a Y180 rotation, so
+  // walking out of the lenses corresponds to local -Z in the deviceGroup frame.
+  const _fpForwardLocal = new THREE.Vector3(0, 0, -1);
+
+  // Camera transition state
+  let cameraTransition = {
+    active: false,
+    startTime: 0,
+    duration: 1.5,
+    startYaw: 0, startPitch: 0, startDist: 0, startTarget: new THREE.Vector3(),
+    targetYaw: 0, targetPitch: 0, targetDist: 0, targetTarget: new THREE.Vector3()
+  };
+
+  // Auto camera fit function - calculates camera position to fit hands and head
+  function computeAutoCameraFit() {
+    // Collect all visible points (device + hands)
+    const points = [];
+
+    // Add device position
+    if (deviceGroup.position.length() > 0.001 || vioData) {
+      points.push(deviceGroup.position.clone());
+    }
+
+    // Add visible hand joints
+    [leftHand, rightHand].forEach(hand => {
+      hand.joints.forEach(joint => {
+        if (joint.visible) {
+          points.push(joint.position.clone());
+        }
+      });
+    });
+
+    if (points.length === 0) return;
+
+    // Compute bounding box
+    const bbox = new THREE.Box3();
+    points.forEach(p => bbox.expandByPoint(p));
+
+    const center = bbox.getCenter(new THREE.Vector3());
+    const size = bbox.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z, 0.3);
+
+    // Calculate ideal camera distance (with padding)
+    const fov = camera.fov * Math.PI / 180;
+    const idealDist = (maxDim / 2) / Math.tan(fov / 2) * 1.5;
+
+    // Start smooth transition
+    cameraTransition.active = true;
+    cameraTransition.startTime = time;
+    cameraTransition.startYaw = camYaw;
+    cameraTransition.startPitch = camPitch;
+    cameraTransition.startDist = camDist;
+    cameraTransition.startTarget.copy(targetPos);
+
+    cameraTransition.targetTarget.copy(center);
+    cameraTransition.targetDist = Math.max(0.3, Math.min(2.5, idealDist));
+    // Keep similar viewing angle
+    cameraTransition.targetYaw = camYaw;
+    cameraTransition.targetPitch = Math.max(15, Math.min(60, camPitch));
+  }
+
+  function updateCamera() {
+    if (cameraMode === 'FP') {
+      // First-person: glue the camera to the deviceGroup pose.
+      // Hide model in FP (the wearer shouldn't see the back of their own glasses).
+      modelContainer.visible = false;
+
+      deviceGroup.updateMatrixWorld(true);
+      deviceGroup.getWorldPosition(_fpScratchVec);
+      deviceGroup.getWorldQuaternion(_fpScratchQuat);
+      camera.position.copy(_fpScratchVec);
+      camera.quaternion.copy(_fpScratchQuat);
+      // Three.js camera looks down its local -Z; FP makes that align with the
+      // deviceGroup's local -Z, which (after the OBJ wrapper Y180) corresponds
+      // to looking forward out of the lenses.
+
+      document.getElementById('hud').textContent = 'Camera: FP · FOV ' + camera.fov.toFixed(0) + '°';
+      return;
+    }
+
+    // 3P (third-person orbit) — existing behaviour.
+    // Restore model visibility (in case we just switched out of FP).
+    modelContainer.visible = true;
+
+    const yawRad = camYaw * Math.PI / 180;
+    const pitchRad = camPitch * Math.PI / 180;
+
+    camera.position.x = targetPos.x + camDist * Math.sin(yawRad) * Math.cos(pitchRad);
+    camera.position.y = targetPos.y + camDist * Math.sin(pitchRad);
+    camera.position.z = targetPos.z + camDist * Math.cos(yawRad) * Math.cos(pitchRad);
+    camera.lookAt(targetPos);
+
+    document.getElementById('hud').textContent = 'Camera: Y' + camYaw.toFixed(0) + '° P' + camPitch.toFixed(0) + '° D' + camDist.toFixed(2);
+  }
+
+  renderer.domElement.addEventListener('mousedown', () => dragging = true);
+  window.addEventListener('mouseup', () => dragging = false);
+  renderer.domElement.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    if (cameraMode === 'FP') return; // FP camera is driven by the device pose.
+    const rotateMultiplier = flipRotate ? -1 : 1;
+    camYaw += e.movementX * 0.5 * rotateMultiplier;
+    camPitch = Math.max(5, Math.min(89, camPitch - e.movementY * 0.5 * rotateMultiplier));
+  });
+  renderer.domElement.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (cameraMode === 'FP') {
+      // In FP mode the wheel adjusts FOV instead of orbit distance.
+      const fovMultiplier = flipScroll ? -1 : 1;
+      camera.fov = Math.max(20, Math.min(110, camera.fov + e.deltaY * 0.05 * fovMultiplier));
+      camera.updateProjectionMatrix();
+      return;
+    }
+    const scrollMultiplier = flipScroll ? -1 : 1;
+    camDist = Math.max(0.1, Math.min(5, camDist * (1 + e.deltaY * 0.001 * scrollMultiplier)));
+  }, { passive: false });
+
+  // ── Camera-mode toggle wiring ───────────────────────────────────────────────
+  // Persists the choice and syncs the FP switch in the bottom toolbar.
+  function setCameraMode(mode) {
+    if (mode !== 'FP' && mode !== '3P') mode = '3P';
+    cameraMode = mode;
+    const fpEl = document.getElementById('fp-toggle');
+    if (fpEl) fpEl.checked = (mode === 'FP');
+    // When leaving FP, auto-camera-fit re-frames the scene cleanly.
+    if (mode === '3P' && autoCameraFitEnabled) {
+      lastAutoCameraFitTime = time - 9; // trigger next-frame refit
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // GRID
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // Ground grid: transparent + depthWrite:false so anything BELOW the grid
+  // plane (e.g. low hand joints) is still visible. Without depthWrite:false
+  // the invisible cells between grid lines still cull pixels behind them,
+  // which hides hands when they drop below y = -0.5.
+  const gridMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    uniforms: {
+      gridSize: { value: 0.10 },
+      lineWidth: { value: 0.010 },
+      fadeRadius: { value: 0.5 },
+      maxRadius: { value: 2.0 },
+      lineColor: { value: new THREE.Color(0xB4A89C) },
+      opacity: { value: 0.35 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vWorldPos;
+      void main() {
+        vUv = uv;
+        vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float gridSize;
+      uniform float lineWidth;
+      uniform float fadeRadius;
+      uniform float maxRadius;
+      uniform vec3 lineColor;
+      uniform float opacity;
+      varying vec2 vUv;
+      varying vec3 vWorldPos;
+
+      void main() {
+        vec2 gridPos = vWorldPos.xz / gridSize;
+        vec2 grid = abs(fract(gridPos - 0.5) - 0.5);
+        float line = min(grid.x, grid.y);
+        float gridLine = 1.0 - smoothstep(0.0, lineWidth, line);
+        float dist = length(vWorldPos.xz);
+        float fade = 1.0 - smoothstep(fadeRadius, maxRadius, dist);
+        float alpha = gridLine * fade * opacity;
+        gl_FragColor = vec4(lineColor, alpha);
+      }
+    `
+  });
+
+  const gridGeometry = new THREE.PlaneGeometry(12, 12);
+  gridGeometry.rotateX(-Math.PI / 2);
+  const grid = new THREE.Mesh(gridGeometry, gridMaterial);
+  grid.position.y = -0.5;
+  scene.add(grid);
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // RGB XYZ AXES HELPER (R=X, G=Y, B=Z)
+  // ═══════════════════════════════════════════════════════════════════════════════
+  function createRGBAxes(length = 0.05) {
+    const group = new THREE.Group();
+
+    // X axis - Red
+    const xMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const xGeo = new THREE.CylinderGeometry(0.003, 0.003, length, 8);
+    const xAxis = new THREE.Mesh(xGeo, xMat);
+    xAxis.rotation.z = -Math.PI / 2;
+    xAxis.position.x = length / 2;
+    group.add(xAxis);
+    const xArrowGeo = new THREE.ConeGeometry(0.008, 0.02, 8);
+    const xArrow = new THREE.Mesh(xArrowGeo, xMat);
+    xArrow.rotation.z = -Math.PI / 2;
+    xArrow.position.x = length;
+    group.add(xArrow);
+
+    // Y axis - Green
+    const yMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const yGeo = new THREE.CylinderGeometry(0.003, 0.003, length, 8);
+    const yAxis = new THREE.Mesh(yGeo, yMat);
+    yAxis.position.y = length / 2;
+    group.add(yAxis);
+    const yArrowGeo = new THREE.ConeGeometry(0.008, 0.02, 8);
+    const yArrow = new THREE.Mesh(yArrowGeo, yMat);
+    yArrow.position.y = length;
+    group.add(yArrow);
+
+    // Z axis - Blue
+    const zMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const zGeo = new THREE.CylinderGeometry(0.003, 0.003, length, 8);
+    const zAxis = new THREE.Mesh(zGeo, zMat);
+    zAxis.rotation.x = Math.PI / 2;
+    zAxis.position.z = length / 2;
+    group.add(zAxis);
+    const zArrowGeo = new THREE.ConeGeometry(0.008, 0.02, 8);
+    const zArrow = new THREE.Mesh(zArrowGeo, zMat);
+    zArrow.rotation.x = Math.PI / 2;
+    zArrow.position.z = length;
+    group.add(zArrow);
+
+    return group;
+  }
+
+  // World origin axes
+  const worldAxes = createRGBAxes(0.2);
+  worldAxes.position.y = -0.5;
+  worldAxes.visible = show3DAxes; // Respect initial show3DAxes setting
+  scene.add(worldAxes);
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // MATERIALS
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const gradientTex = new THREE.DataTexture(new Uint8Array([40, 120, 200, 255]), 4, 1, THREE.LuminanceFormat);
+  gradientTex.magFilter = THREE.NearestFilter;
+  gradientTex.needsUpdate = true;
+
+  const materials = {
+    vertices: new THREE.PointsMaterial({ color: TEAL, size: 0.003, transparent: true, opacity: 0.6 }),
+    verticesLine: new THREE.LineBasicMaterial({ color: TEAL, transparent: true, opacity: 0.3 }),  // kept for legacy color-picker references; vertices mode itself is removed.
+    toon: new THREE.MeshToonMaterial({ color: TEAL, gradientMap: gradientTex }),
+    wireframe: new THREE.MeshBasicMaterial({ color: TEAL, wireframe: true, transparent: true, opacity: 0.7 }),
+    hologram: new THREE.ShaderMaterial({
+      transparent: true,
+      uniforms: {
+        time: { value: 0 },
+        baseColor: { value: new THREE.Color(TEAL) }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vPosition = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec3 baseColor;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
+          float scanline = sin(vPosition.y * 200.0 + time * 3.0) * 0.1 + 0.9;
+          float alpha = fresnel * 0.7 + 0.15;
+          alpha *= scanline;
+          gl_FragColor = vec4(baseColor, alpha);
+        }
+      `
+    }),
+    xray: new THREE.ShaderMaterial({
+      transparent: true,
+      side: THREE.DoubleSide,
+      uniforms: {
+        baseColor: { value: new THREE.Color(TEAL) }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 baseColor;
+        varying vec3 vNormal;
+        void main() {
+          float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+          vec3 color = baseColor * intensity + vec3(0.4, 0.45, 0.5) * (1.0 - intensity);
+          gl_FragColor = vec4(color, intensity * 0.7 + 0.1);
+        }
+      `
+    }),
+    normal: new THREE.MeshNormalMaterial({ flatShading: false, transparent: true, opacity: 0.85 })
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // DEVICE (GLASSES) GROUP - This is what gets positioned/rotated by VIO
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const deviceGroup = new THREE.Group();
+  scene.add(deviceGroup);
+
+  // RGB axes attached directly to deviceGroup (shows VIO coordinate system)
+  // Apply Y180 rotation to correct for backend coordinate conversion
+  // (backend outputs left-handed coords but Three.js is right-handed)
+  const deviceAxes = createRGBAxes(0.08);
+  deviceAxes.rotation.set(0, Math.PI, 0);
+  deviceAxes.visible = show3DAxes; // Respect initial show3DAxes setting
+  deviceGroup.add(deviceAxes);
+
+  // Container for the 3D model (no static rotation — the CDN OBJ wrapper gets
+  // its own Y180 rotation applied at load time; see OBJ loader below).
+  const modelContainer = new THREE.Group();
+  deviceGroup.add(modelContainer);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ARIA DEVICE 3D MODEL
+  // ════════════════════════════════════════════════════════════════════════════
+  //
+  // IMPORTANT for any LLM / agent reading this template:
+  // The Aria glasses are rendered from the bundled 3D mesh file
+  //   templates/resources/aria-glasses.obj
+  // (loaded below via OBJLoader). Do NOT replace this with a procedural
+  // glasses model built from primitive shapes (BoxGeometry / CylinderGeometry
+  // for frames, lenses, hinges, temples, etc.). A previous
+  // createAriaGlassesModel() procedural fallback existed here and was deleted
+  // on purpose — the primitive version looks nothing like real Aria Gen2
+  // hardware and confuses users.
+  //
+  // If the OBJ ever fails to load, fix the asset path; do NOT fall back to
+  // primitives. The 'vertices' mode (loaded separately from the JSON point
+  // cloud below) is the only acceptable alternate representation.
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // Load the OBJ model (the only supported device representation — no primitive fallback).
+  // Sourced from CDN so the template works standalone without a sibling
+  // resources/ folder. The CDN OBJ does NOT have a pre-baked Y180
+  // rotation, so we apply it here on the wrapper.
+  let objMesh = null;
+  const loader = new THREE.OBJLoader();
+  loader.load('https://d2xsxph8kpxj0f.cloudfront.net/310519663349528530/XokRYHSYejR9ZK3bmQpv3n/aria-glasses_782503ea.obj',
+    (obj) => {
+      // First, compute bounding box and center
+      const box = new THREE.Box3().setFromObject(obj);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+
+      // Guard against degenerate bounding boxes (zero or NaN size)
+      const maxDim = Math.max(size.x, size.y, size.z);
+      if (!isFinite(maxDim) || maxDim < 1e-6) {
+        console.error('OBJ has degenerate bounding box, skipping:', size);
+        return;
+      }
+
+      // Scale to approximately 0.15m (15cm) — typical glasses width.
+      const scale = 0.15 / maxDim;
+
+      // Wrapper group: centring (translate) is applied to obj, scaling to wrapper.
+      // Y180 rotation orients the CDN OBJ to match the device frame (the CDN
+      // version does NOT have a pre-baked Y180 like the local OBJ would).
+      const wrapper = new THREE.Group();
+      obj.position.set(-center.x, -center.y, -center.z);
+      wrapper.add(obj);
+      wrapper.scale.setScalar(scale);
+      wrapper.rotation.set(0, Math.PI, 0);
+
+      objMesh = wrapper;
+      modelContainer.add(wrapper);
+      modelContainer.updateMatrixWorld(true);
+
+      applyStyle(currentStyle);
+      console.log('OBJ model loaded and centered, scale=', scale.toFixed(5));
+    },
+    null,
+    (err) => {
+      // OBJ failed to load. Do NOT build a primitive fallback.
+      // The vertices mode (loaded separately from the JSON point cloud below)
+      // is the only acceptable alternate representation.
+      console.error('Failed to load aria-glasses.obj from CDN:', err);
+    }
+  );
+
+  // (Vertices mode removed — was loaded from a separate JSON point cloud and
+  // did not map correctly to the device pose. The OBJ-based render styles
+  // below are the only supported representations.)
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // HAND TRACKING
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const HAND_CONNS = [[5,6],[6,7],[7,0],[5,8],[8,9],[9,10],[10,1],[5,11],[11,12],[12,13],[13,2],[5,14],[14,15],[15,16],[16,3],[5,17],[17,18],[18,19],[19,4],[6,8],[8,11],[11,14],[14,17]];
+  const jointRadius = 0.006;
+  const capsuleRadius = 0.003;
+  const jointGeo = new THREE.SphereGeometry(jointRadius, 12, 8);
+  const capsuleGeo = new THREE.CylinderGeometry(capsuleRadius, capsuleRadius, 1, 8);
+
+  function createHandMesh() {
+    const group = new THREE.Group();  // Used only to store references, not as a parent node
+    const joints = [];
+    const capsules = [];
+
+    for (let i = 0; i < 21; i++) {
+      const sphere = new THREE.Mesh(jointGeo, materials.toon.clone());
+      sphere.visible = false;
+      joints.push(sphere);
+      scene.add(sphere);  // Add directly to scene, not to group
+    }
+
+    HAND_CONNS.forEach(() => {
+      const capsule = new THREE.Mesh(capsuleGeo, materials.toon.clone());
+      capsule.visible = false;
+      capsules.push(capsule);
+      scene.add(capsule);  // Add directly to scene, not to group
+    });
+
+    const wristAxes = createRGBAxes(0.04);
+    wristAxes.visible = false;
+    scene.add(wristAxes);  // Add directly to scene
+
+    return { group, joints, capsules, wristAxes };
+  }
+
+  const leftHand = createHandMesh();
+  const rightHand = createHandMesh();
+  // No need to add group to scene — spheres and capsules are already added directly
+
+  // Store device pose for hand transformation - need quaternion_full for hands
+  let devicePoseForHands = {
+    position: new THREE.Vector3(0, 0, 0),
+    quaternionFull: new THREE.Quaternion(0, 0, 0, 1)
+  };
+
+  function updateHandMesh(handDataInput, handMesh) {
+    if (!handDataInput || !handDataInput.joints || handDataInput.joints.length < 21) {
+      handMesh.joints.forEach(j => j.visible = false);
+      handMesh.capsules.forEach(c => c.visible = false);
+      if (handMesh.wristAxes) handMesh.wristAxes.visible = false;
+      return;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HAND TRANSFORMATION (from NebulaSDKSolution.md)
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Hand landmarks are in Surreal DEVICE-RELATIVE coordinates (Z-up, right-handed)
+    //
+    // To convert to Web world coordinates:
+    // Backend already does: Surreal→Web coordinate conversion + Device→World transform
+    //
+    // Using backend-transformed coordinates directly (Device→World already applied)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    const worldPos = handDataInput.joints.map(joint => {
+      const p = joint.position;
+      // Use coordinates from backend directly
+      return new THREE.Vector3(p.x, p.y, p.z);
+    });
+
+    handMesh.joints.forEach((sphere, i) => {
+      if (i < worldPos.length) {
+        sphere.position.copy(worldPos[i]);
+        sphere.visible = true;
+      } else {
+        sphere.visible = false;
+      }
+    });
+
+    HAND_CONNS.forEach(([a, b], i) => {
+      const capsule = handMesh.capsules[i];
+      if (a < worldPos.length && b < worldPos.length) {
+        const start = worldPos[a];
+        const end = worldPos[b];
+        const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+        const dir = new THREE.Vector3().subVectors(end, start);
+        const len = dir.length();
+
+        capsule.position.copy(mid);
+        capsule.scale.set(1, len, 1);
+        capsule.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+        capsule.visible = true;
+      } else {
+        capsule.visible = false;
+      }
+    });
+
+    if (handMesh.wristAxes && worldPos.length > 5 && show3DAxes) {
+      handMesh.wristAxes.position.copy(worldPos[5]);
+      handMesh.wristAxes.visible = true;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // STYLE SWITCHING
+  // ═══════════════════════════════════════════════════════════════════════════════
+  function applyStyle(style) {
+    currentStyle = style;
+
+    // OBJ model: always visible, swap material per style.
+    modelContainer.visible = true;
+    if (objMesh) {
+      const mat = materials[style];
+      if (mat) {
+        objMesh.traverse((child) => {
+          if (child.isMesh) child.material = mat;
+        });
+      }
+    }
+
+    // Hand materials: use the same style material as the glasses.
+    const handMat = materials[style] || materials.hologram;
+
+    [leftHand, rightHand].forEach(h => {
+      h.joints.forEach(j => {
+        j.material = handMat.clone ? handMat.clone() : handMat;
+      });
+      h.capsules.forEach(c => {
+        c.material = handMat.clone ? handMat.clone() : handMat;
+      });
+    });
+
+    document.querySelectorAll('.style-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === style);
+    });
+  }
+
+  // Listen for style change requests from external script
+  window.addEventListener('applyStyleRequest', (e) => {
+    applyStyle(e.detail);
+  });
+
+  // Listen for camera-mode change requests from the external segmented control.
+  window.addEventListener('cameraModeRequest', (e) => {
+    setCameraMode(e.detail);
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 2D AXES INDICATOR (Canvas overlay)
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const axesCanvas = document.getElementById('axes');
+  const axesCtx = axesCanvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const axesSize = 80;
+  axesCanvas.width = axesSize * dpr;
+  axesCanvas.height = axesSize * dpr;
+  axesCanvas.style.width = axesSize + 'px';
+  axesCanvas.style.height = axesSize + 'px';
+  axesCtx.scale(dpr, dpr);
+
+  function drawAxes() {
+    const cx = 40, cy = 40, L = 25;
+    const cosY = Math.cos(camYaw * Math.PI / 180), sinY = Math.sin(camYaw * Math.PI / 180);
+    const cosP = Math.cos(camPitch * Math.PI / 180), sinP = Math.sin(camPitch * Math.PI / 180);
+
+    axesCtx.clearRect(0, 0, axesSize, axesSize);
+
+    const AXIS_COLORS = { X: '#f87171', Y: '#4ade80', Z: '#60a5fa' };
+
+    [{ l: 'X', d: [1, 0, 0] }, { l: 'Y', d: [0, 1, 0] }, { l: 'Z', d: [0, 0, 1] }].forEach(a => {
+      let [x, y, z] = a.d;
+      let x1 = x * cosY - z * sinY, z1 = x * sinY + z * cosY;
+      let y1 = y * cosP - z1 * sinP, z2 = y * sinP + z1 * cosP;
+      const ex = cx + x1 * L, ey = cy - y1 * L;
+
+      const color = AXIS_COLORS[a.l];
+      axesCtx.globalAlpha = z2 > 0 ? 0.35 : 0.85;
+      axesCtx.strokeStyle = color;
+      axesCtx.lineWidth = 2;
+      axesCtx.beginPath();
+      axesCtx.moveTo(cx, cy);
+      axesCtx.lineTo(ex, ey);
+      axesCtx.stroke();
+
+      const ang = Math.atan2(ey - cy, ex - cx);
+      axesCtx.fillStyle = color;
+      axesCtx.beginPath();
+      axesCtx.moveTo(ex, ey);
+      axesCtx.lineTo(ex - 7 * Math.cos(ang - 0.5), ey - 7 * Math.sin(ang - 0.5));
+      axesCtx.lineTo(ex - 7 * Math.cos(ang + 0.5), ey - 7 * Math.sin(ang + 0.5));
+      axesCtx.closePath();
+      axesCtx.fill();
+
+      axesCtx.font = 'bold 11px system-ui';
+      axesCtx.fillText(a.l, ex + 8, ey + 4);
+    });
+    axesCtx.globalAlpha = 1;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // WEBSOCKET CONNECTION (for standalone use)
+  // ═══════════════════════════════════════════════════════════════════════════════
+  function connectWebSocket() {
+    const ws = new WebSocket('ws://localhost:17300');
+
+    ws.onopen = () => {
+      console.log('WebSocket connected to ws://localhost:17300');
+      // Subscribe only to the streams this template uses
+      ws.send(JSON.stringify({ type: 'subscribe', streams: ['vio', 'hand_tracking'] }));
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected, reconnecting...');
+      setTimeout(connectWebSocket, 2000);
+    };
+
+    ws.onerror = (err) => {
+      console.warn('WebSocket error:', err);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'vio') {
+          vioData = msg.data;
+        } else if (msg.type === 'hand_tracking') {
+          handData = msg.data;
+        }
+      } catch (e) {
+        console.warn('Parse error:', e);
+      }
+    };
+  }
+
+  // Start WebSocket connection
+  connectWebSocket();
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // NEBULA DATA EVENT HANDLER (for iframe use - kept for compatibility)
+  // ═══════════════════════════════════════════════════════════════════════════════
+  window.addEventListener('nebulaDataUpdate', e => {
+    vioData = e.detail.vio;
+    handData = e.detail.handTracking;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UPDATE VIO DEBUG PANEL (Simplified)
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (vioData) {
+      const fmt = (v) => v?.toFixed(3) || '0.000';
+      const fmt2 = (v) => v?.toFixed(2) || '0.00';
+
+      // Final Position
+      if (vioData.position) {
+        document.getElementById('final-pos-x').textContent = fmt(vioData.position.x);
+        document.getElementById('final-pos-y').textContent = fmt(vioData.position.y);
+        document.getElementById('final-pos-z').textContent = fmt(vioData.position.z);
+      }
+
+      // Final Euler angles
+      if (vioData.euler) {
+        document.getElementById('final-yaw').textContent = fmt2(vioData.euler.yaw);
+        document.getElementById('final-pitch').textContent = fmt2(vioData.euler.pitch);
+        document.getElementById('final-roll').textContent = fmt2(vioData.euler.roll);
+      }
+
+      // T_device_cpf Calibration
+      if (vioData.debug && vioData.debug.t_device_cpf) {
+        const cpf = vioData.debug.t_device_cpf;
+        document.getElementById('cpf-pos-x').textContent = fmt(cpf.pos.x);
+        document.getElementById('cpf-pos-y').textContent = fmt(cpf.pos.y);
+        document.getElementById('cpf-pos-z').textContent = fmt(cpf.pos.z);
+        document.getElementById('cpf-quat-w').textContent = fmt(cpf.quat.w);
+        document.getElementById('cpf-quat-x').textContent = fmt(cpf.quat.x);
+        document.getElementById('cpf-quat-y').textContent = fmt(cpf.quat.y);
+        document.getElementById('cpf-quat-z').textContent = fmt(cpf.quat.z);
+        document.getElementById('cpf-source').textContent = cpf.source || 'unknown';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UPDATE HAND TRACKING PANEL (Joint Selector + Distance)
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (handData) {
+      // Get selected hand (left or right)
+      const handSelect = document.getElementById('hand-select');
+      const selectedHand = handSelect ? handSelect.value : 'left';
+      const hand = selectedHand === 'left' ? handData.left : handData.right;
+
+      if (hand && hand.joints && hand.joints.length >= 21) {
+        const fmt = (v) => v?.toFixed(3) || '0.000';
+
+        // Get selected joint indices
+        const joint1Idx = parseInt(document.getElementById('joint1-select').value);
+        const joint2Idx = parseInt(document.getElementById('joint2-select').value);
+
+        // Get joint positions
+        const j1 = hand.joints[joint1Idx]?.position;
+        const j2 = hand.joints[joint2Idx]?.position;
+
+        if (j1) {
+          document.getElementById('joint1-x').textContent = fmt(j1.x);
+          document.getElementById('joint1-y').textContent = fmt(j1.y);
+          document.getElementById('joint1-z').textContent = fmt(j1.z);
+        }
+
+        if (j2) {
+          document.getElementById('joint2-x').textContent = fmt(j2.x);
+          document.getElementById('joint2-y').textContent = fmt(j2.y);
+          document.getElementById('joint2-z').textContent = fmt(j2.z);
+        }
+
+        // Calculate distance between joints
+        if (j1 && j2) {
+          const dx = j2.x - j1.x;
+          const dy = j2.y - j1.y;
+          const dz = j2.z - j1.z;
+          const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+          const distanceEl = document.getElementById('joint-distance');
+          const indicatorEl = document.getElementById('pinch-indicator');
+          const PINCH_THRESHOLD = 0.03; // 3cm
+
+          distanceEl.textContent = distance.toFixed(3);
+          if (distance < PINCH_THRESHOLD) {
+            distanceEl.style.color = '#4ade80'; // Green when pinching
+            indicatorEl.textContent = 'PINCH';
+          } else {
+            distanceEl.style.color = ''; // Normal color
+            indicatorEl.textContent = '';
+          }
+        }
+      }
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ANIMATION LOOP
+  // ═══════════════════════════════════════════════════════════════════════════════
+  let time = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.016;
+
+    if (materials.hologram.uniforms) {
+      materials.hologram.uniforms.time.value = time;
+    }
+
+    updateCamera();
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UPDATE DEVICE POSE FROM VIO DATA
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (vioData && vioData.position && vioData.quaternion) {
+      // Backend already performed the complete VIO pipeline (gravity alignment +
+      // Surreal→Web coordinate conversion). Apply position and quaternion
+      // directly to the device group without further transformation.
+      deviceGroup.position.set(
+        vioData.position.x,
+        vioData.position.y,
+        vioData.position.z
+      );
+      deviceGroup.quaternion.set(
+        vioData.quaternion.x,
+        vioData.quaternion.y,
+        vioData.quaternion.z,
+        vioData.quaternion.w
+      );
+
+      // Store device pose for hand transformation
+      devicePoseForHands.position.copy(deviceGroup.position);
+
+      // For hands, we need quaternion_full (gravity-aligned quaternion in Surreal frame)
+      if (vioData.quaternion_full) {
+        const qf = vioData.quaternion_full;
+        devicePoseForHands.quaternionFull.set(qf.x, qf.y, qf.z, qf.w);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UPDATE HANDS
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (handData) {
+      updateHandMesh(handData.left, leftHand);
+      updateHandMesh(handData.right, rightHand);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // AUTO CAMERA FIT
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (autoCameraFitEnabled && time - lastAutoCameraFitTime > 10) {
+      lastAutoCameraFitTime = time;
+      computeAutoCameraFit();
+    }
+
+    // Smooth camera transition
+    if (cameraTransition.active) {
+      const t = Math.min(1, (time - cameraTransition.startTime) / cameraTransition.duration);
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
+
+      camYaw = cameraTransition.startYaw + (cameraTransition.targetYaw - cameraTransition.startYaw) * ease;
+      camPitch = cameraTransition.startPitch + (cameraTransition.targetPitch - cameraTransition.startPitch) * ease;
+      camDist = cameraTransition.startDist + (cameraTransition.targetDist - cameraTransition.startDist) * ease;
+      targetPos.lerpVectors(cameraTransition.startTarget, cameraTransition.targetTarget, ease);
+
+      if (t >= 1) cameraTransition.active = false;
+    }
+
+    renderer.render(scene, camera);
+    drawAxes();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // DEVELOPER PANEL
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const devBtn = document.getElementById('dev-btn');
+  const devPanel = document.getElementById('dev-panel');
+  let devPanelTimeout = null;
+  const DEV_PANEL_HIDE_DELAY = 60000; // 1 minute
+
+  function resetDevPanelTimeout() {
+    if (devPanelTimeout) clearTimeout(devPanelTimeout);
+    devPanelTimeout = setTimeout(() => {
+      devPanel.classList.remove('open');
+    }, DEV_PANEL_HIDE_DELAY);
+  }
+
+  devBtn.addEventListener('click', () => {
+    devPanel.classList.toggle('open');
+    if (devPanel.classList.contains('open')) {
+      resetDevPanelTimeout();
+    } else {
+      if (devPanelTimeout) clearTimeout(devPanelTimeout);
+    }
+  });
+
+  devPanel.addEventListener('mouseenter', () => {
+    if (devPanelTimeout) clearTimeout(devPanelTimeout);
+  });
+
+  devPanel.addEventListener('mouseleave', () => {
+    if (devPanel.classList.contains('open')) {
+      resetDevPanelTimeout();
+    }
+  });
+
+  devBtn.addEventListener('mouseenter', () => {
+    if (devPanelTimeout) clearTimeout(devPanelTimeout);
+  });
+
+  devBtn.addEventListener('mouseleave', () => {
+    if (devPanel.classList.contains('open')) {
+      resetDevPanelTimeout();
+    }
+  });
+
+  devPanel.addEventListener('input', () => resetDevPanelTimeout());
+  devPanel.addEventListener('change', () => resetDevPanelTimeout());
+
+  // Grid controls
+  document.getElementById('gridSize').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    gridMaterial.uniforms.gridSize.value = val;
+    document.getElementById('gridSize-val').textContent = val.toFixed(2);
+  });
+
+  document.getElementById('lineWidth').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    gridMaterial.uniforms.lineWidth.value = val;
+    document.getElementById('lineWidth-val').textContent = val.toFixed(3);
+  });
+
+  document.getElementById('fadeRadius').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    gridMaterial.uniforms.fadeRadius.value = val;
+    document.getElementById('fadeRadius-val').textContent = val.toFixed(1);
+  });
+
+  document.getElementById('maxRadius').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    gridMaterial.uniforms.maxRadius.value = val;
+    document.getElementById('maxRadius-val').textContent = val.toFixed(1);
+  });
+
+  document.getElementById('gridOpacity').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    gridMaterial.uniforms.opacity.value = val;
+    document.getElementById('gridOpacity-val').textContent = val.toFixed(2);
+  });
+
+  document.getElementById('gridHeight').addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value);
+    grid.position.y = val;
+    worldAxes.position.y = val;
+    document.getElementById('gridHeight-val').textContent = val.toFixed(2);
+  });
+
+  document.getElementById('flipRotate').addEventListener('change', (e) => {
+    flipRotate = e.target.checked;
+  });
+
+  document.getElementById('flipScroll').addEventListener('change', (e) => {
+    flipScroll = e.target.checked;
+  });
+
+  document.getElementById('show3DAxes').addEventListener('change', (e) => {
+    show3DAxes = e.target.checked;
+    worldAxes.visible = show3DAxes;
+    deviceAxes.visible = show3DAxes;
+  });
+
+  document.getElementById('autoCameraFit').addEventListener('change', (e) => {
+    autoCameraFitEnabled = e.target.checked;
+  });
+
+  // Color picker
+  document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const colorHex = btn.dataset.color;
+      baseColor = parseInt(colorHex.replace('#', '0x'));
+
+      // Update materials with new base color
+      const newColor = new THREE.Color(baseColor);
+
+      // Update all material colors
+      materials.vertices.color.copy(newColor);
+      materials.verticesLine.color.copy(newColor);
+      materials.toon.color.copy(newColor);
+      materials.wireframe.color.copy(newColor);
+
+      // Update hologram shader uniform
+      if (materials.hologram.uniforms && materials.hologram.uniforms.baseColor) {
+        materials.hologram.uniforms.baseColor.value.copy(newColor);
+      }
+
+      // Update x-ray shader uniform
+      if (materials.xray.uniforms && materials.xray.uniforms.baseColor) {
+        materials.xray.uniforms.baseColor.value.copy(newColor);
+      }
+
+      // Force update all meshes that use these materials
+      // Update OBJ model meshes
+      if (objMesh) {
+        objMesh.traverse((child) => {
+          if (child.isMesh) {
+            child.material.needsUpdate = true;
+          }
+        });
+      }
+
+      // (Vertices container was removed; no traversal needed.)
+
+      // Update hand meshes
+      [leftHand, rightHand].forEach(hand => {
+        hand.joints.forEach(joint => {
+          if (joint.material && joint.material.color) {
+            joint.material.color.copy(newColor);
+            joint.material.needsUpdate = true;
+          }
+        });
+        hand.capsules.forEach(capsule => {
+          if (capsule.material && capsule.material.color) {
+            capsule.material.color.copy(newColor);
+            capsule.material.needsUpdate = true;
+          }
+        });
+      });
+
+      // Re-apply current style to ensure consistency
+      applyStyle(currentStyle);
+    });
+  });
+
+  // Set default color button as active
+  document.querySelector('.color-btn[data-color="#18EED4"]')?.classList.add('active');
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════════════════════════════════
+  function onResize() {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  }
+  window.addEventListener('resize', onResize);
+
+  setTimeout(() => {
+    const welcome = document.getElementById('welcome');
+    if (welcome) welcome.style.opacity = '0';
+  }, 15000);
+
+  applyStyle('hologram');
+  // Apply the persisted camera mode (from localStorage) once at startup so the
+  // segmented control's visual state matches and (if FP was last used) the
+  // first frame already renders in FP mode.
+  setCameraMode(cameraMode);
+  animate();
+})();
+</script>
+
+<!-- Mode Selector - Fixed at bottom center, aligned with Camera info -->
+<div id="style-selector" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;z-index:9999;">
+  <button class="style-btn" data-style="toon">Toon</button>
+  <button class="style-btn" data-style="wireframe">Wireframe</button>
+  <button class="style-btn active" data-style="hologram">Hologram</button>
+  <button class="style-btn" data-style="xray">X-Ray</button>
+  <button class="style-btn" data-style="normal">Normal</button>
+  <div style="width:1px;height:16px;background:#D0D5DA;margin:0 4px;"></div>
+  <label class="dev-toggle" style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+    <input type="checkbox" id="auto-cycle">
+    <div class="toggle-track"></div>
+    <span style="font-size:11px;color:#67788A;">Cycle</span>
+  </label>
+  <div style="width:1px;height:16px;background:#D0D5DA;margin:0 4px;"></div>
+  <!-- FP toggle: off (default) = third-person orbit, on = first-person (head-locked, wheel adjusts FOV). -->
+  <label class="dev-toggle" style="display:flex;align-items:center;gap:6px;cursor:pointer;" title="First-person camera (head-locked). Wheel adjusts FOV.">
+    <input type="checkbox" id="fp-toggle">
+    <div class="toggle-track"></div>
+    <span style="font-size:11px;color:#67788A;">FP</span>
+  </label>
+</div>
+
+<script>
+// Mode selector event listeners (separate script to run after DOM)
+document.querySelectorAll('.style-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const style = btn.dataset.style;
+    // Dispatch custom event that the main script listens to
+    window.dispatchEvent(new CustomEvent('applyStyleRequest', { detail: style }));
+    // Update active class
+    document.querySelectorAll('.style-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === style);
+    });
+  });
+});
+
+// Auto-cycle toggle
+const autoCycleEl = document.getElementById('auto-cycle');
+if (autoCycleEl) {
+  let autoCycleInterval = null;
+  const styles = ['toon', 'wireframe', 'hologram', 'xray', 'normal'];
+  let styleIndex = styles.indexOf('hologram');
+
+  autoCycleEl.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      autoCycleInterval = setInterval(() => {
+        styleIndex = (styleIndex + 1) % styles.length;
+        window.dispatchEvent(new CustomEvent('applyStyleRequest', { detail: styles[styleIndex] }));
+        document.querySelectorAll('.style-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.style === styles[styleIndex]);
+        });
+      }, 10000);
+    } else {
+      if (autoCycleInterval) clearInterval(autoCycleInterval);
+    }
+  });
+}
+
+// FP camera toggle. Off = 3P (orbit, default; always restored on page load).
+// On = FP (head-locked, wheel adjusts FOV). Dispatches a request to the main
+// IIFE; no persistence across reloads (intentional — we want 3P as the
+// landing experience every time).
+(function wireFpToggle() {
+  const el = document.getElementById('fp-toggle');
+  if (!el) return;
+  el.checked = false;
+  el.addEventListener('change', () => {
+    const mode = el.checked ? 'FP' : '3P';
+    window.dispatchEvent(new CustomEvent('cameraModeRequest', { detail: mode }));
+  });
+})();
+</script>
+
+</body>
+</html>

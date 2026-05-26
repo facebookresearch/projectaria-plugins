@@ -1,0 +1,58 @@
+name: Plugin install smoke test
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".claude-plugin/**"
+      - "**/.claude-plugin/**"
+      - "**/SKILL.md"
+      - ".github/workflows/smoke-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Marketplace structure smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install validation deps
+        run: pip install -r scripts/requirements.txt
+
+      # Run the full chain in one shot - exits non-zero if anything is off.
+      # This mirrors what Claude Code does when loading the marketplace:
+      # parse marketplace.json -> resolve each plugin.json -> load skills.
+      - name: Validate marketplace
+        run: python scripts/validate_marketplace.py
+
+      - name: Validate skills
+        run: python scripts/validate_skills.py
+
+      - name: Required files
+        run: python scripts/check_required_files.py
+
+      - name: Print plugin summary
+        run: |
+          python <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path(".claude-plugin/marketplace.json").read_text())
+          print(f"Marketplace: {m['name']}  (owner: {m['owner']['name']})")
+          for p in m["plugins"]:
+              print(f"  - {p['name']} -> {p['source']}")
+              pj = json.loads((Path(p['source']) / ".claude-plugin" / "plugin.json").read_text())
+              skills = sorted(Path(p['source'], 'skills').glob('*/SKILL.md'))
+              print(f"     version {pj['version']}, {len(skills)} skill(s):")
+              for s in skills:
+                  print(f"       * {s.parent.name}")
+          PY

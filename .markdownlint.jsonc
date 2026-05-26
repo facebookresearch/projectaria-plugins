@@ -1,0 +1,28 @@
+// Markdownlint configuration.
+// See https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+{
+  "default": true,
+
+  // Line length – be lenient for docs but warn on egregious cases.
+  "MD013": {
+    "line_length": 120,
+    "code_blocks": false,
+    "tables": false,
+    "headings": false
+  },
+
+  // Allow inline HTML (badges, callouts).
+  "MD033": false,
+
+  // Allow duplicate headings at different levels (e.g. multiple "## Usage").
+  "MD024": { "siblings_only": true },
+
+  // First-line heading not required (some files start with frontmatter).
+  "MD041": false,
+
+  // Allow bare URLs (we wrap most but not all).
+  "MD034": false,
+
+  // Allow trailing punctuation in headings (e.g. "Q&A?").
+  "MD026": false
+}

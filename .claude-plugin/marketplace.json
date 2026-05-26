@@ -1,0 +1,18 @@
+{
+  "name": "projectaria-plugins",
+  "owner": {
+    "name": "Project Aria Team",
+    "url": "https://www.projectaria.com/"
+  },
+  "metadata": {
+    "description": "Official Claude Code marketplace for Project Aria smart glasses plugins.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "aria-ark",
+      "source": "./projectaria_ark_plugin",
+      "description": "Aria Research Kit (ARK) skills for building applications with Project Aria smart glasses. Covers data processing (VRS, MPS, calibration) and real-time webapp development (WebSocket streaming, 3D visualization, voice pipeline)."
+    }
+  ]
+}
