@@ -18,7 +18,7 @@ references for a specific surface of the Aria developer ecosystem.
 Add this marketplace to Claude Code:
 
 ```bash
-claude plugin marketplace add github.com/facebookresearch/projectaria-plugins
+claude plugin marketplace add https://github.com/facebookresearch/projectaria-plugins.git
 ```
 
 Then install any plugin from it:

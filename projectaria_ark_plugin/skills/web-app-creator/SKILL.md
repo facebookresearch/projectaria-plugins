@@ -1,6 +1,6 @@
 ---
 name: web-app-creator
-description: "Build webapps that integrate with Meta Aria Gen2 (Nebula) smart glasses, usable by any agent that supports skills (Manus, Claude Code, etc.). Covers the full Web App Creator stack: real-time sensor data via WebSocket at ws://localhost:17300 (VIO, hand tracking, eye gaze, IMU, PPG, audio, camera), the nebulaDataUpdate event bridge pattern used by Web App Creator, and the complete bidirectional voice pipeline (VAD, Whisper STT, hallucination filtering, LLM chat, TTS echo suppression). Use this skill for any Aria-connected webapp — from simple data visualizations to full conversational AI experiences."
+description: "Build webapps that integrate with Meta Aria Gen2 (Nebula) smart glasses, usable by any agent that supports skills (Manus, Claude Code, etc.). macOS only — the backend launcher and auto-`open` browser hooks are written for macOS; Windows and Linux are not supported. Covers the full Web App Creator stack: real-time sensor data via WebSocket at ws://localhost:17300 (VIO, hand tracking, eye gaze, IMU, PPG, audio, camera), the nebulaDataUpdate event bridge pattern used by Web App Creator, and the complete bidirectional voice pipeline (VAD, Whisper STT, hallucination filtering, LLM chat, TTS echo suppression). Use this skill for any Aria-connected webapp — from simple data visualizations to full conversational AI experiences."
 ---
 
 # Web App Creator Skill
