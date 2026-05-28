@@ -11,6 +11,8 @@ description: "Build webapps that integrate with Meta Aria Gen2 (Nebula) smart gl
 > as **Manus-only** because they describe constraints or APIs unique to that host;
 > ignore them when running under another agent.
 
+<!-- -->
+
 > [!IMPORTANT]
 > **Supported host OS: macOS only (for now).**
 > The bundled backend launcher (`start-web-app-creator-backend.command`) and the
@@ -123,16 +125,19 @@ Due to a recent change in Manus, the side-preview can no longer access local Web
 If a user is working on a project created with an older version of the Web App Creator skill, **three things need updating**. (Quick check: does the WebSocket URL use port `8080`? If yes, it's an old project and needs migration.)
 
 ### 1. WebSocket Port Changed
+
 - Old: `ws://localhost:8080`
 - New: `ws://localhost:17300`
 - **Action:** Find and replace all `8080` → `17300` in WebSocket connection URLs.
 
 ### 2. Stream Subscription is Now Mandatory
+
 - Old behavior: clients received ALL streams by default on connect.
 - New behavior: clients receive NOTHING until they send a `subscribe` message.
 - **Action:** Ensure `ws.onopen` sends `{"type": "subscribe", "streams": ["vio", "hand_tracking", ...]}` with the streams the project actually needs.
 
 ### 3. Video Streams Now Use Binary WebSocket Frames
+
 - Old: image data arrived as JSON with base64-encoded JPEG in `data.image` field, rendered via `data:image/jpeg;base64,...` data URI.
 - New: image data arrives as binary WebSocket frames (ArrayBuffer) with a compact header (1 byte type + camera_id + raw JPEG bytes).
 - **Action:**
@@ -305,6 +310,7 @@ See `references/visual_style_guide.md` for the **optional** Project Aria visual 
 ## Common Patterns
 
 ### Display camera feed
+
 ```javascript
 // RGB frames arrive as binary WebSocket frames (blob URLs from useNebulaStream)
 // If using the AriaClient class:
@@ -317,6 +323,7 @@ aria.on('rgb_frame', (data) => {
 ```
 
 ### Detect pinch gesture
+
 ```javascript
 aria.on('hand_tracking', (data) => {
   if (data.right?.gestures.pinch.detected) triggerAction();
@@ -324,6 +331,7 @@ aria.on('hand_tracking', (data) => {
 ```
 
 ### Gaze cursor
+
 ```javascript
 aria.on('eye_gaze', (data) => {
   const x = Math.tan(data.yaw * Math.PI / 180) * 100;
@@ -333,6 +341,7 @@ aria.on('eye_gaze', (data) => {
 ```
 
 ### Transform hand joints to world space (3D scenes)
+
 ```javascript
 // Hand positions are already in world coordinates (X-mirrored by backend)
 // Simply use them directly with VIO position offset
@@ -343,6 +352,7 @@ function toWorld(jointPos, vio) {
 ```
 
 ### Decode audio samples
+
 ```javascript
 aria.on('audio', (data) => {
   const bytes = Uint8Array.from(atob(data.samples), c => c.charCodeAt(0));
@@ -352,6 +362,7 @@ aria.on('audio', (data) => {
 ```
 
 ### Send TTS to glasses speaker
+
 ```javascript
 aria.sendTTS('Hello from the webapp!');
 // Or via raw WebSocket:
@@ -366,7 +377,7 @@ The full bidirectional voice pipeline turns Aria glasses into a conversational A
 
 ### Pipeline Architecture
 
-```
+```text
 Aria mic → ws://localhost:17300 (audio frames at 50Hz)
   → useAriaAudio hook (frame reception, ref-based callback)
   → useVAD hook (3-state machine: idle → listening → processing)
@@ -481,6 +492,7 @@ See `templates/voice-pipeline/.env.example` for full configuration recipes and `
 ## 🎯 DevicePoseAndHands.html — The Go-To Template for 3D
 
 **When to use DevicePoseAndHands.html:**
+
 - ✅ Any project showing 3D glasses model
 - ✅ Any project with hand tracking visualization
 - ✅ Any project displaying device pose/orientation
@@ -488,6 +500,7 @@ See `templates/voice-pipeline/.env.example` for full configuration recipes and `
 - ✅ Games or interactive experiences using head/hand tracking
 
 **What's included:**
+
 - WebSocket connection to `ws://localhost:17300` (auto-reconnect)
 - nebulaDataUpdate event listener (for iframe compatibility)
 - 3D Aria glasses model (OBJ + JSON wireframe)
@@ -498,12 +511,14 @@ See `templates/voice-pipeline/.env.example` for full configuration recipes and `
 - Developer panel with coordinate debugging
 
 **How to use as starting point:**
+
 1. Copy `templates/device-pose-and-hands/DevicePoseAndHands.html` to your project (and copy the sibling `templates/resources/` folder, or update the asset paths inside the file)
 2. Modify the visual style, add your UI elements
 3. Add your application logic in the animation loop
 4. The data connection and 3D rendering are already working
 
 **Key code sections to customize:**
+
 ```javascript
 // Animation loop — add your logic here
 function animate(time) {
@@ -522,6 +537,7 @@ function animate(time) {
 ## 🎯 StreamPanel.html — The Go-To Template for Sensor Panels
 
 **When to use StreamPanel.html:**
+
 - ✅ Any panel / dashboard showing live sensor data (RGB, SLAM, ET, VIO, IMU, audio, PPG)
 - ✅ Single-sensor mini components (copy the file, delete every section except the one you need)
 - ✅ Multi-sensor debug overlays inside Web App Creator
@@ -529,6 +545,7 @@ function animate(time) {
 - ✅ First-pass scaffold for *any* 2D visualization component — the section structure is your starting point
 
 **What's included:**
+
 - WebSocket connection to `ws://localhost:17300` with auto-reconnect (exponential backoff, 20 attempts)
 - Subscription to every stream type (`rgb_frame`, `slam_frame`, `et_frame`, `vio`, `hand_tracking`, `eye_gaze`, `imu`, `audio`, `ppg`, `device_status`)
 - Binary frame decoder (`0x01` / `0x02` / `0x03` headers → Blob → `URL.createObjectURL`) with blob-URL revocation
@@ -540,6 +557,7 @@ function animate(time) {
 - Single light theme, single-column scrollable layout — designed to drop into a sandbox iframe
 
 **How to use as starting point:**
+
 1. Copy `templates/stream-panels/StreamPanel.html` into your project (e.g. `generated_components/<id>/component.html`).
 2. Open it in a browser (or load it inside an iframe) with the Aria backend running on `ws://localhost:17300`. Verify the live data flows.
 3. **Delete every section you don't need** — every section in the `<div class="grid">` is structurally independent, and dropping a section also lets you remove its CSS rules and its `update*()` handler in the script block.
@@ -547,6 +565,7 @@ function animate(time) {
 5. Add your application logic alongside the existing `update*()` handlers in the inline `<script>`.
 
 **Key code sections to customize:**
+
 ```javascript
 // Sensor data handlers — add your logic here
 function updateVio(d)    { /* head pose: position, euler, quaternion */ }
@@ -585,6 +604,7 @@ For the `.obj` file, use Three.js `OBJLoader` from `three/examples/jsm/loaders/O
 ## Coordinate System
 
 All spatial data uses **Y-up coordinates** with **X-axis mirrored** for intuitive "mirror view" display:
+
 - X: right (+) / left (−) — **mirrored at backend** so moving left shows left movement on screen
 - Y: up (+) / down (−)
 - Z: forward (+) / backward (−)
@@ -600,6 +620,7 @@ All spatial data uses **Y-up coordinates** with **X-axis mirrored** for intuitiv
 When building 3D scenes with **both device (glasses) and hands**, you must use the correct quaternion field:
 
 ### Device Pose (Glasses Model)
+
 ```javascript
 // ✅ CORRECT: Use `quaternion` (relative rotation in odometry frame)
 const q = vio.quaternion;
@@ -608,6 +629,7 @@ glassesModel.position.set(vio.position.x, vio.position.y, vio.position.z);
 ```
 
 ### Hand Positions
+
 ```javascript
 // ✅ CORRECT: Use joint positions directly (already in world coordinates)
 handData.joints.forEach(joint => {
@@ -617,6 +639,7 @@ handData.joints.forEach(joint => {
 ```
 
 ### Common Mistake ❌
+
 ```javascript
 // ❌ WRONG: Using quaternion_full for device causes mismatch with hands
 const q = vio.quaternion_full;  // DON'T use this for device pose in 3D scenes

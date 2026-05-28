@@ -19,11 +19,13 @@ This skill is a navigation map — it tells you where the key APIs and source fi
 - **GitHub**: https://github.com/facebookresearch/projectaria_tools
 - **Docs**: https://facebookresearch.github.io/projectaria_tools/gen2/research-tools/projectariatools/overview
 - **Install** (pip in a virtual environment):
+
   ```bash
   python3 -m venv $HOME/projectaria_gen2_python_env
   source $HOME/projectaria_gen2_python_env/bin/activate
   python3 -m pip install 'projectaria-tools[all]'
   ```
+
 - **Supported**: Linux x64 (Ubuntu/Fedora), macOS Apple Silicon (M1+). Python 3.9–3.12.
 - **Build from source**: See `CMakeLists.txt` at repo root and the Advanced Installation docs.
 
@@ -68,6 +70,7 @@ Access sensor data by index or by timestamp. Time-based queries take a `TimeDoma
 Each `SensorData` object has typed accessors for: image, IMU, magnetometer, barometer, GPS, audio, eye tracking, WiFi, Bluetooth. **Read `core/python/SensorDataPyBind.h` for all accessors and return types.**
 
 Gotchas:
+
 - Magnetometer shares the `MotionData` type with IMU — check validity flags to distinguish.
 - All sensor data is timestamped; retrieve via the time accessor with an optional `TimeDomain` argument.
 
@@ -121,9 +124,11 @@ Device and per-sensor calibration — focal length, principal point, distortion 
 ### SE3 Transforms
 
 6-DOF rigid body transforms (rotation + translation):
+
 ```python
 from projectaria_tools.core.sophus import SE3
 ```
+
 Supports translation, rotation, matrix conversion, inversion, composition, point transformation. **Read `core/python/sophus/`** for the full API.
 
 ### Detecting Gen1 vs Gen2
@@ -133,12 +138,15 @@ Gen1 vs Gen2 can be distinguished from the `device_type` field in the image conf
 ## MPS Data Loading
 
 Load cloud MPS results alongside VRS data:
+
 ```python
 from projectaria_tools.core import mps
 ```
+
 **Read `core/python/MpsPyBind.h`** for all reader functions and return types.
 
 Key concepts:
+
 - **Trajectory**: timestamps + SE3 poses (`T_world_device`)
 - **Point cloud**: 3D points in world coordinates; observations: 2D pixel coords per frame. Join observations to points via `uid`.
 - **Hand tracking**: `from projectaria_tools.core.mps import hand_tracking`

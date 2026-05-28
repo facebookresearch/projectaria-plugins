@@ -16,6 +16,7 @@ A multi-participant egocentric dataset collected with Aria Gen2 glasses. Include
 - **Paper**: https://arxiv.org/abs/2510.16134
 
 The source code is the authoritative source for dataset format and API. Key files in `data_provider/`:
+
 - `aria_gen2_pilot_data_provider.py` — main `AriaGen2PilotDataProvider` class
 - `aria_gen2_pilot_data_paths.py` — dataset directory structure and file locations
 - `aria_gen2_pilot_dataset_data_types.py` — all data types (HeartRateData, DiarizationData, BoundingBox2D/3D, HandObjectInteractionData, etc.)

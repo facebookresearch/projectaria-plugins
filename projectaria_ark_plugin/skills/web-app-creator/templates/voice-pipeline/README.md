@@ -8,7 +8,7 @@ Works with **just an OpenAI key** out of the box — or swap in Anthropic Claude
 
 ## Layout
 
-```
+```text
 voice-pipeline/
 ├── client/                       React hooks (drop into any React project)
 │   ├── useAriaAudio.ts           Subscribe to Aria audio frames over WebSocket

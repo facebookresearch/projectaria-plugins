@@ -27,7 +27,6 @@ from pathlib import Path
 import frontmatter
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 # Anchored kebab-case: starts with a letter, hyphens must be between
 # alphanumeric segments (disallows `a-`, `a--a`, trailing hyphens, etc.).

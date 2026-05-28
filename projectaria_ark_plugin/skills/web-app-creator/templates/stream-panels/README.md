@@ -19,6 +19,7 @@ A single self-contained HTML file (`StreamPanel.html`) that renders a multi-sens
 ## When to use this template
 
 Use `StreamPanel.html` as the starting point when the LLM-generated component needs to:
+
 - Show **multiple** sensor streams at once on a single page.
 - Demonstrate end-to-end wiring (binary frame parsing, ring-buffer audio, TTS round-trip).
 - Be inspected at a glance during development to verify which streams are actually flowing.

@@ -2,6 +2,6 @@
 # Skip files we don't author or that contain intentional foreign words.
 skip = .git,*.svg,*.lock,.lycheecache,node_modules,LICENSE
 # Add words to ignore here, comma-separated and lower-case.
-ignore-words-list = ot,ist,fo,nd
+ignore-words-list = ot,ist,fo,nd,als
 check-filenames =
 check-hidden =

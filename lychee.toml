@@ -39,7 +39,7 @@ exclude = [
 include_fragments = false
 
 # Don't follow `mailto:` links.
-exclude_mail = true
+include_mail = false
 
 # Treat 200-299 as success and warn on redirects, fail on others.
 exclude_path = [
