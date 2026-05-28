@@ -9,7 +9,7 @@ about Project Aria more broadly:
 
 - **Project Aria documentation:** <https://facebookresearch.github.io/projectaria_tools/gen2>
 - **Community Discord:** Reach out to support team to join.
-- **Support team**: Reach out to use by sending emails to AriaOps@meta.com.
+- **Support team**: Reach out to us by sending emails to AriaOps@meta.com.
 
 ## Reporting bugs
 

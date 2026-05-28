@@ -81,12 +81,26 @@ The SDK follows a client → device → operation model:
 
 Default to `aria_streaming_viewer` — more polished and actively maintained. Start streaming first, then launch the viewer in a separate terminal. `aria_rerun_viewer` is for playback of downloaded VRS files, not live streaming.
 
+### Streaming Certificates (TLS)
+
+Streaming between device and host uses TLS with self-signed certificates. Two cert types exist:
+
+- **Persistent** — stored in `~/.aria/streaming-certs/persistent/`, survive across sessions, installed via `aria_gen2 streaming install-certificates` or auto-generated on first `aria_gen2 streaming start`
+- **Ephemeral** — stored in `~/.aria/streaming-certs/ephemeral/`, regenerated each session
+
+The CLI `aria_gen2 streaming start` auto-installs a persistent cert if none exists — no manual cert setup needed for the typical workflow.
+
+**Viewer only loads persistent certs.** Both `aria_streaming_viewer` and the multi-device streaming viewer hardcode to `~/.aria/streaming-certs/persistent/`. If streaming was started with ephemeral certs (e.g. via Python SDK with `StreamingSecurityOptions.use_ephemeral_certs = True`), the viewer's TLS handshake will silently fail — the viewer appears to start but shows no data. There is no error message indicating a cert mismatch.
+
+**Rule**: When using the viewer, always ensure streaming uses persistent certs (the default). If you must use ephemeral certs for a custom Python SDK workflow, do not use `aria_streaming_viewer` — handle stream data via SDK callbacks instead.
+
 ## Key Constraints
 
 - **Auth before anything**: All connections fail without prior `aria_gen2 auth pair`.
 - **Recording and streaming are exclusive**: Cannot run both on-device simultaneously. Use `record_to_vrs()` for host-side capture during streaming.
 - **USB required for control**: USB connection is needed to start/stop streaming, even when streaming wirelessly.
 - **Streaming before viewer**: The viewer connects to an active stream — start streaming first.
+- **Viewer requires persistent certs**: The viewer only loads certs from `~/.aria/streaming-certs/persistent/`. Streaming with ephemeral certs will silently fail to display in the viewer.
 - **Guest WiFi won't work**: Guest networks block peer-to-peer communication required for streaming.
 
 ## Gen1 vs Gen2
@@ -106,4 +120,5 @@ The pip package includes both. Gen1 uses `aria` CLI and `import aria.sdk`. Gen2 
 | `auth pair` hangs | Open Companion App, navigate to pairing screen. Check phone internet. |
 | Streaming disconnects | USB: use quality cable, avoid hubs. WiFi: check signal/firewall. |
 | Device overheating | Shuts down at ~44°C. Cool 5-10 min. Limit hotspot streaming to ~20 min. |
+| Viewer starts but no data | Cert mismatch: streaming used ephemeral certs but the viewer only loads persistent certs. Restart streaming without `use_ephemeral_certs`, or run `aria_gen2 streaming install-certificates` then restart streaming. |
 | `GLIBCXX_3.4.31 not found` (Ubuntu 22) | `sudo apt install g++-13` |
