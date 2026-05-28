@@ -39,6 +39,7 @@ data: {
 ```
 
 > ⚠️ **IMPORTANT for 3D scenes with device + hands:**
+>
 > - **Device model:** Use `quaternion` (not `quaternion_full`)
 > - **Hand positions:** Use joint positions directly (already in matching world coordinates)
 > - **Mixing `quaternion_full` with pre-computed hand positions causes mismatch!**
@@ -66,7 +67,8 @@ interface HandData {
 ```
 
 **Joint IDs:**
-```
+
+```text
 0=THUMB_TIP  1=INDEX_TIP  2=MIDDLE_TIP  3=RING_TIP  4=PINKY_TIP
 5=WRIST      6=THUMB_IP   7=THUMB_MCP   8=THUMB_CMC
 9=INDEX_DIP  10=INDEX_MCP 11=INDEX_PIP
@@ -76,6 +78,7 @@ interface HandData {
 ```
 
 **Connection pairs for skeleton rendering:**
+
 ```javascript
 const HAND_CONNECTIONS = [
   [5,7],[7,6],[6,0],               // Thumb
@@ -187,6 +190,7 @@ Image streams (RGB, SLAM, ET) are sent as **binary WebSocket frames** (not JSON 
 | 2+N.. | JPEG bytes | Raw JPEG image data |
 
 **Client-side parsing:**
+
 ```javascript
 ws.binaryType = 'arraybuffer';
 ws.onmessage = (event) => {
@@ -236,6 +240,7 @@ data: {
 ```
 
 **Example** _(values are illustrative only — real values come from the device):_
+
 ```json
 {
   "type": "device_status",
@@ -253,6 +258,7 @@ data: {
 ```
 
 **Usage — always handle the "no data yet" state:**
+
 ```javascript
 let deviceStatus = null; // null until first message arrives
 

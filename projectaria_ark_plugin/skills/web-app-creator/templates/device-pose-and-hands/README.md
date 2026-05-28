@@ -14,6 +14,7 @@ Keep `resources/` next to `device-pose-and-hands/` so the relative paths resolve
 ## When to use this template
 
 Pick this template when the LLM-generated component needs to:
+
 - Visualize the wearer's head pose in 3D (yaw/pitch/roll + position drift).
 - Show live left/right hand skeletons co-located with the glasses model.
 - Demonstrate AR / spatial overlays anchored to the device frame.

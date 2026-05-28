@@ -27,7 +27,6 @@ from pathlib import Path
 
 import jsonschema
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 SCHEMAS_DIR = REPO_ROOT / ".claude-plugin" / "schemas"

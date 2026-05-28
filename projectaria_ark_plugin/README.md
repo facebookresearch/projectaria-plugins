@@ -34,9 +34,11 @@ claude plugin install aria-ark@projectaria-plugins
 | web-app-creator | `/aria-ark:web-app-creator` | Build real-time webapps that stream live Aria Gen2 sensor data via WebSocket (`ws://localhost:17300`) — VIO, hand tracking, eye gaze, IMU, PPG, audio, camera — plus a full bidirectional voice pipeline (VAD, Whisper STT, LLM chat, TTS). macOS only. |
 
 ## Requirements
+
 - Python 3.10+ (for projectaria-tools)
 - Node.js 18+ (for the `web-app-creator` skill)
 - Project Aria glasses (for live streaming features)
 
 ## Links
+
 - [Project Aria Documentation](https://facebookresearch.github.io/projectaria_tools/gen2/)
