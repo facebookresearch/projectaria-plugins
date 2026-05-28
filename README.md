@@ -39,6 +39,17 @@ codex plugin marketplace add https://github.com/facebookresearch/projectaria-plu
 Then open Codex chat, run `/plugin`, choose the Project Aria Plugins
 marketplace, and install any plugin from it, e.g.`aria-ark`.
 
+### Gemini CLI
+
+Install as a Gemini CLI extension:
+
+```bash
+gemini extensions install https://github.com/facebookresearch/projectaria-plugins.git
+```
+
+The extension loads the `GEMINI.md` context file at session start, which
+includes a tool mapping table and imports all ARK skill content.
+
 ## Plugins
 
 | Plugin | Description |

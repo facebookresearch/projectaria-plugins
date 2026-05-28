@@ -1,4 +1,4 @@
-# Aria ARK Development Guide
+# Aria ARK — Gemini CLI Context
 
 > **ARK** = Aria Research Kit — the developer toolset for Project Aria smart glasses.
 
@@ -19,9 +19,9 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 
 ## Skills
 
-@./skills/projectaria-tools/SKILL.md
-@./skills/client-sdk/SKILL.md
-@./skills/mps/SKILL.md
-@./skills/vrs-health-check/SKILL.md
-@./skills/pilot-dataset/SKILL.md
-@./skills/web-app-creator/SKILL.md
+@./projectaria_ark_plugin/skills/projectaria-tools/SKILL.md
+@./projectaria_ark_plugin/skills/client-sdk/SKILL.md
+@./projectaria_ark_plugin/skills/mps/SKILL.md
+@./projectaria_ark_plugin/skills/vrs-health-check/SKILL.md
+@./projectaria_ark_plugin/skills/pilot-dataset/SKILL.md
+@./projectaria_ark_plugin/skills/web-app-creator/SKILL.md
