@@ -19,6 +19,8 @@ Checks:
 6. Plugin names are unique across each marketplace.
 7. Plugin manifest `name` matches the marketplace entry `name`.
 8. Each plugin has README.md.
+9. `gemini-extension.json` is valid JSON with required fields and its
+   `contextFileName` points to an existing file.
 """
 
 from __future__ import annotations
@@ -33,6 +35,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 CLAUDE_SCHEMAS_DIR = REPO_ROOT / ".claude-plugin" / "schemas"
 CODEX_MARKETPLACE_JSON = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
+GEMINI_EXTENSION_JSON = REPO_ROOT / "gemini-extension.json"
 CODEX_INSTALLATION_POLICIES = {
     "NOT_AVAILABLE",
     "AVAILABLE",
@@ -291,11 +294,41 @@ def _validate_codex_marketplace(errors: list[str]) -> int:
     return len(plugin_names_seen)
 
 
+def _validate_gemini_extension(errors: list[str]) -> bool:
+    ext = _load_json(GEMINI_EXTENSION_JSON, errors)
+    if ext is None:
+        return False
+
+    start = len(errors)
+    label = "gemini-extension.json"
+    for field in ("name", "contextFileName"):
+        _expect_string(ext, field, label, errors)
+
+    context_file = ext.get("contextFileName")
+    if isinstance(context_file, str) and context_file:
+        context_path = (REPO_ROOT / context_file).resolve()
+        try:
+            context_path.relative_to(REPO_ROOT)
+        except ValueError:
+            _fail(
+                f"{label}: contextFileName {context_file!r} escapes repo root",
+                errors,
+            )
+            return len(errors) == start
+        if not context_path.is_file():
+            _fail(
+                f"{label}: contextFileName {context_file!r} does not exist",
+                errors,
+            )
+    return len(errors) == start
+
+
 def main() -> int:
     errors: list[str] = []
 
     claude_plugin_count = _validate_claude_marketplace(errors)
     codex_plugin_count = _validate_codex_marketplace(errors)
+    gemini_ok = _validate_gemini_extension(errors)
 
     if errors:
         print(f"\n❌ {len(errors)} marketplace validation error(s):\n", file=sys.stderr)
@@ -303,11 +336,13 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(
-        "✅ marketplace manifests OK "
-        f"({claude_plugin_count} Claude plugin(s), "
-        f"{codex_plugin_count} Codex plugin(s) validated)"
-    )
+    parts = [
+        f"{claude_plugin_count} Claude plugin(s)",
+        f"{codex_plugin_count} Codex plugin(s)",
+    ]
+    if gemini_ok:
+        parts.append("Gemini extension")
+    print(f"✅ marketplace manifests OK ({', '.join(parts)} validated)")
     return 0
 
 
