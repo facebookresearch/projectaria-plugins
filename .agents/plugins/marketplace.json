@@ -1,0 +1,20 @@
+{
+  "name": "projectaria-plugins",
+  "interface": {
+    "displayName": "Project Aria Plugins"
+  },
+  "plugins": [
+    {
+      "name": "aria-ark",
+      "source": {
+        "source": "local",
+        "path": "./projectaria_ark_plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

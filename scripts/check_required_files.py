@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     "SECURITY.md",
     "SUPPORT.md",
     ".claude-plugin/marketplace.json",
+    ".agents/plugins/marketplace.json",
 ]
 
 
