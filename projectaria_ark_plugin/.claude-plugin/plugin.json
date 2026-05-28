@@ -3,6 +3,17 @@
   "description": "Aria Research Kit (ARK) skills for building applications with Project Aria smart glasses. Covers data processing (VRS, MPS, calibration) and real-time webapp development (WebSocket streaming, 3D visualization, voice pipeline).",
   "version": "1.0.0",
   "author": {
-    "name": "Project Aria Team"
-  }
+    "name": "Project Aria Team",
+    "url": "https://www.projectaria.com/"
+  },
+  "homepage": "https://facebookresearch.github.io/projectaria_tools/gen2/",
+  "repository": "https://github.com/facebookresearch/projectaria-plugins",
+  "license": "Apache-2.0",
+  "keywords": [
+    "aria",
+    "ark",
+    "projectaria",
+    "vrs",
+    "mps"
+  ]
 }
