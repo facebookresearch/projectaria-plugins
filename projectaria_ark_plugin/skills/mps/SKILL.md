@@ -76,10 +76,20 @@ See the data formats docs for exact CSV column definitions, coordinate conventio
 
 On-device eye gaze and VIO are embedded in the VRS during recording (accessible via PAT Tutorial_4 and Tutorial_5). Cloud MPS produces substantially better results using offline algorithms — higher accuracy for both SLAM and hand tracking. See the benchmarks page for quantitative comparisons.
 
-## Troubleshooting
+## ⛔ MANDATORY: Troubleshooting
+
+**When any MPS command fails, returns unexpected output, or produces low-quality results, you MUST consult this section and the official troubleshooting page BEFORE attempting your own diagnosis.** This is not optional. MPS failures have MPS-specific root causes (health check rejections, insufficient recording length, coordinate frame mismatches) that generic debugging will misdiagnose.
+
+Anti-patterns:
+- ❌ "I think I know what's wrong" — check the list below and the official page first; your guess wastes the user's time when the documented fix is right here.
+- ❌ "Let me try reprocessing" — understand WHY it failed first. Blindly rerunning with `--force` wastes upload time and quota.
+- ❌ "This looks like a generic upload/network error" — MPS has specific retry and resumable upload logic. Check the CLI guide before improvising.
+
+**Official troubleshooting page**: https://facebookresearch.github.io/projectaria_tools/gen2/ark/support/mps — covers symptoms not listed below.
+
+### Common Issues
 
 - Check `summary.json` for per-service status (SUCCESS/WARNING/ERROR) and quality metrics
 - MPS requires a valid VRS health check — fix health check issues first
 - Short recordings (<30s) may lack enough data for SLAM loop closure
 - Featureless environments, pure rotation, or extreme motion blur degrade SLAM quality
-- Docs: https://facebookresearch.github.io/projectaria_tools/gen2/ark/support/sdk

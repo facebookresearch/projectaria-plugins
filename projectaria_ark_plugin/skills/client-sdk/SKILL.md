@@ -109,15 +109,24 @@ The CLI `aria_gen2 streaming start` auto-installs a persistent cert if none exis
 - **Streaming before viewer**: The viewer connects to an active stream — start streaming first.
 - **Viewer requires persistent certs**: The viewer only loads certs from `~/.aria/streaming-certs/persistent/`. Streaming with ephemeral certs will silently fail to display in the viewer.
 - **Guest WiFi won't work**: Guest networks block peer-to-peer communication required for streaming.
+- **Errors → Troubleshooting section FIRST**: When any SDK command fails or returns unexpected output, you MUST check the Troubleshooting section below and the official troubleshooting page before attempting your own diagnosis. Do not guess root causes from training data — Aria errors have Aria-specific causes that generic debugging will miss.
 
 ## Gen1 vs Gen2
 
 The pip package includes both. Gen1 uses `aria` CLI and `import aria.sdk`. Gen2 uses `aria_gen2` CLI and `import aria.sdk_gen2`. Type stubs: `sdk.pyi` (Gen1), `sdk_gen2.pyi` (Gen2). Gen1 and Gen2 SDK are **NOT interchangeable**.
 
-## Troubleshooting
+## ⛔ MANDATORY: Troubleshooting
 
-- **First step**: `aria_doctor` — configures ports and diagnoses connectivity.
-- **More**: https://facebookresearch.github.io/projectaria_tools/gen2/ark/support/sdk
+**When any Client SDK command fails or returns unexpected output, you MUST consult this section and the official troubleshooting page BEFORE attempting your own diagnosis.** This is not optional. Aria failures have Aria-specific root causes (sandbox blocks, cert mismatches, thermal shutdowns, mDNS issues) that generic debugging will misdiagnose.
+
+Anti-patterns:
+- ❌ "I think I know what's wrong" — check the table first; your guess wastes the user's time when the documented fix is one row away.
+- ❌ "Let me try a different approach" — the documented fix exists for a reason. Try it before improvising.
+- ❌ "This looks like a generic Python/network error" — it almost certainly has an Aria-specific cause.
+
+**Resources**:
+- **First step always**: `aria_doctor` — configures ports and diagnoses connectivity.
+- **Official troubleshooting page**: https://facebookresearch.github.io/projectaria_tools/gen2/ark/support/sdk — covers symptoms not listed below.
 
 ### Common Issues
 
