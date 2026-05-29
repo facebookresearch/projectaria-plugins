@@ -79,7 +79,14 @@ The SDK follows a client → device → operation model:
 
 ### Streaming Visualization
 
-Default to `aria_streaming_viewer` — more polished and actively maintained. Start streaming first, then launch the viewer in a separate terminal. `aria_rerun_viewer` is for playback of downloaded VRS files, not live streaming.
+Default to `aria_streaming_viewer` — more polished and actively maintained. `aria_rerun_viewer` is for playback of downloaded VRS files, not live streaming.
+
+**`aria_streaming_viewer` is a persistent GUI window** — it displays live sensor data for as long as the streaming session lasts. It does NOT exit after launch. When launching it:
+
+- Start streaming first (`aria_gen2 streaming start`), then launch the viewer.
+- Run it as a background process (`run_in_background` or `&`) — it blocks the terminal indefinitely.
+- Do NOT wait for it to exit, kill it, or treat it as a one-shot command.
+- It stays alive until the user closes the window or streaming stops.
 
 ### Streaming Certificates (TLS)
 
