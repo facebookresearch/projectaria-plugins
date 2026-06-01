@@ -2418,7 +2418,7 @@ class WebSocketBridge:
     async def run(self):
         """Run the WebSocket server."""
         # Save event loop reference for callbacks
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
 
         self.setup_receiver()
         self.start_receiver()
