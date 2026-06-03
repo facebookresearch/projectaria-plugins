@@ -50,11 +50,9 @@ def _log_startup_header():
     logger.info(f"Python    : {platform.python_version()} ({platform.machine()})")
     logger.info(f"Platform  : {platform.platform()}")
     try:
-        import projectaria_client_sdk
+        from aria._version import __version__ as aria_sdk_version
 
-        logger.info(
-            f"Aria SDK  : {getattr(projectaria_client_sdk, '__version__', 'unknown')}"
-        )
+        logger.info(f"Aria SDK  : {aria_sdk_version}")
     except Exception:
         logger.info("Aria SDK  : version unavailable")
     logger.info(f"websockets: {websockets.__version__}")
