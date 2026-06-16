@@ -1,0 +1,78 @@
+{
+  "name": "mp_streaming_demo",
+  "description": "Machine perception streaming demo (streaming only)",
+  "imus": {
+    "rate_hz": 800
+  },
+  "audio": {
+    "sample_rate": 1,
+    "frame_period": 3,
+    "sample_format": 1,
+    "encoding_format": 2,
+    "opus_config": {
+      "complexity": 10,
+      "bitrate": 256000
+    }
+  },
+  "slam_cameras": {
+    "rate_hz": 10,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cqp": {
+        "qp": 30
+      }
+    }
+  },
+  "et_cameras": {
+    "rate_hz": 5,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cqp": {
+        "qp": 30
+      }
+    }
+  },
+  "rgb_camera": {
+    "rate_hz": 10,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "iframe_period": 30,
+      "cbr": {
+        "bitrate": 1200000
+      }
+    },
+    "blur_filter_config": {
+      "enabled": 1,
+      "threshold": 50,
+      "window_ms": 400
+    }
+  },
+  "et": {
+    "rate_hz": 30
+  },
+  "ht": {
+    "rate_hz": 10
+  },
+  "vio": {
+    "rate_hz": 10,
+    "extract_image_keypoints": 2
+  },
+  "device_info": {
+    "period_ms": 10000
+  },
+  "ppg": {
+    "rate_hz": 128
+  },
+  "temperature": {
+    "rate_hz": 1
+  },
+  "vio_high_frequency_pose": {
+    "rate_hz": 800
+  },
+  "type": 2,
+  "recommended": true,
+  "public": true
+}

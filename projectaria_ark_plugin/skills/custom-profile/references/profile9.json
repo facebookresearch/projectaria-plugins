@@ -1,0 +1,79 @@
+{
+  "name": "profile9",
+  "description": "General purpose streaming profile",
+  "imus": {
+    "rate_hz": 800
+  },
+  "magnetometer": {
+    "rate_hz": 100
+  },
+  "barometer": {
+    "rate_hz": 50
+  },
+  "audio": {
+    "sample_rate": 1,
+    "frame_period": 3,
+    "sample_format": 1,
+    "encoding_format": 2,
+    "opus_config": {
+      "complexity": 10,
+      "bitrate": 256000
+    }
+  },
+  "slam_cameras": {
+    "rate_hz": 10,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cbr": {
+        "bitrate": 900000
+      }
+    }
+  },
+  "rgb_camera": {
+    "rate_hz": 5,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cbr": {
+        "bitrate": 8000000
+      }
+    },
+    "resolution": 3,
+    "blur_filter_config": {
+      "enabled": 1,
+      "threshold": 60,
+      "window_ms": 400
+    },
+    "width": 2560,
+    "height": 1920
+  },
+  "et": {
+    "rate_hz": 30
+  },
+  "ht": {
+    "rate_hz": 30
+  },
+  "vio": {
+    "rate_hz": 10
+  },
+  "device_info": {
+    "period_ms": 10000
+  },
+  "ppg": {
+    "rate_hz": 128
+  },
+  "temperature": {
+    "rate_hz": 1
+  },
+  "als": {
+    "rate_hz": 10,
+    "exposure_time_us": 3200
+  },
+  "vio_high_frequency_pose": {
+    "rate_hz": 800
+  },
+  "type": 2,
+  "recommended": true,
+  "public": true
+}

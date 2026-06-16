@@ -1,0 +1,103 @@
+{
+  "name": "profile8",
+  "description": "General purpose recording profile",
+  "imus": {
+    "rate_hz": 800
+  },
+  "magnetometer": {
+    "rate_hz": 100
+  },
+  "barometer": {
+    "rate_hz": 50
+  },
+  "audio": {
+    "sample_rate": 1,
+    "frame_period": 3,
+    "sample_format": 1,
+    "encoding_format": 2,
+    "opus_config": {
+      "complexity": 10,
+      "bitrate": 256000
+    }
+  },
+  "gps": {
+    "rate_hz": 1
+  },
+  "ble": {
+    "period_ms": 30000,
+    "duration_ms": 2000
+  },
+  "wifi": {
+    "period_ms": 30000,
+    "scan_mode": 2
+  },
+  "slam_cameras": {
+    "rate_hz": 30,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cqp": {
+        "qp": 24
+      }
+    }
+  },
+  "et_cameras": {
+    "rate_hz": 5,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cqp": {
+        "qp": 22
+      }
+    },
+    "resolution": 1,
+    "ir_led": 1
+  },
+  "rgb_camera": {
+    "rate_hz": 10,
+    "auto_exposure": {},
+    "encoding": 4,
+    "video_config": {
+      "cqp": {
+        "qp": 22
+      }
+    },
+    "resolution": 3,
+    "blur_filter_config": {
+      "enabled": 1,
+      "threshold": 0,
+      "window_ms": 400
+    },
+    "width": 2560,
+    "height": 1920
+  },
+  "et": {
+    "rate_hz": 30
+  },
+  "ht": {
+    "rate_hz": 30
+  },
+  "vio": {
+    "rate_hz": 10
+  },
+  "device_info": {
+    "period_ms": 30000
+  },
+  "ppg": {
+    "rate_hz": 128
+  },
+  "temperature": {
+    "rate_hz": 1
+  },
+  "als": {
+    "rate_hz": 10,
+    "exposure_time_us": 3200
+  },
+  "vio_high_frequency_pose": {
+    "rate_hz": 800
+  },
+  "type": 1,
+  "recommended": true,
+  "public": true,
+  "button_state": {}
+}

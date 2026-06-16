@@ -60,6 +60,35 @@ Query device status (battery, temperature, WiFi, recording state), connect to Wi
 
 Temporal alignment across multiple Aria Gen2 devices using sub-GHz radio hardware. One device is configured as **broadcaster**, others as **receivers**. The broadcaster transmits its timestamps; receivers record timestamp pairs enabling clock conversion. Configure via `TimeDomainMappingConfig` (Python) or `--all` (CLI) on recording or streaming configs. Post-processing uses PAT's `TimeDomain.SUBGHZ` to query receiver data in the broadcaster's time domain.
 
+### Multi-Device Streaming Server
+
+When you need to stream from multiple devices into a **single host process** (e.g. a headless collection server or a live cross-device visualizer), use the **`AriaGen2HttpServer` + per-connection handler factory** pattern. One server listens on `:6768`; every device that connects gets its own fresh `StreamDataInterface` from a factory callback you supply.
+
+**Per-device data via the `device_id` callback param**: declare `device_id: str | None = None` as a keyword argument on any streaming callback. The SDK detects this via `inspect.signature()` at registration time and starts passing the device's serial number on every fire. Callbacks without the param keep working unchanged — single- and multi-device code can share the same callback.
+
+```python
+def rgb_callback(image_data, image_record, device_id: str | None = None):
+    print(f"[{device_id}] RGB frame")
+
+def setup_stream_handler() -> StreamDataInterface:
+    handler = StreamDataInterface(enable_image_decoding=True, enable_raw_stream=False)
+    handler.register_rgb_callback(rgb_callback)
+    return handler
+
+server = AriaGen2HttpServer(
+    HttpServerConfig(address="0.0.0.0", port=6768),
+    setup_stream_handler,
+)
+```
+
+Start streaming on every device pointing at the same server URL (`aria_gen2 streaming start --all ...` is the quickest path). Each device opens an independent HTTPS connection — verify both are live with `lsof -i :6768`. If only one shows up, the second device probably failed the TLS handshake — **both devices must use the same streaming certificate**. The persistent certificate lives at `~/.aria/streaming-certs/persistent/` on the host PC; both devices receive it on first `aria_gen2 streaming start` from that host. If a device was previously paired against a different host, re-run `aria_gen2 streaming install-certificates` from the current host to overwrite it.
+
+**Cross-thread state needs locking.** Callbacks fire from internal SDK threads, not the main thread. Any per-device dict you read or write from a callback (frame counters, recent TDM offsets, frame buffers) must be guarded by a `threading.Lock`. Even simple counter increments are not safe without it.
+
+The broadcaster does NOT fire TDM callbacks (its `DEVICE_TIME` is the reference, so it has nothing to map). Only receivers report TDM offsets. If you see TDM-callback output for N−1 of your N devices, that's expected — the missing one is the broadcaster.
+
+Worked example: https://facebookresearch.github.io/projectaria_tools/gen2/ark/client-sdk/python-sdk/multi-device-streaming-example
+
 ## CLI vs Python SDK
 
 Pick by intent:

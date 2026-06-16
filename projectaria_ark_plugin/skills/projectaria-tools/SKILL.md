@@ -197,16 +197,73 @@ Tutorial_4 covers on-device eye gaze (lower accuracy, immediate). Cloud MPS prov
 
 ## Visualization & Data Export
 
-Tools in `projectaria_tools/tools/`:
+Tools shipped with PAT — installed with `pip install 'projectaria-tools[all]'`, **except** `aria_viewer` which needs a CMake source build.
 
-| Tool | Purpose |
-|------|---------|
-| `aria_rerun_viewer` | Rerun-based viewer for VRS + optional MPS overlay |
-| `viewer_mps` | MPS-specific viewer (trajectory, point cloud, eye gaze, hands) |
-| `vrs_to_mp4` | Convert VRS camera streams to MP4 video |
-| `gen2_mp_csv_exporter` | Export sensor data to CSV |
+**Always run `<tool> --help` for the current flag set.** Do not assume flag names from memory or from this skill — they drift across releases, and the `--help` output is the only authoritative reference.
 
-See the [Visualization Tools docs](https://facebookresearch.github.io/projectaria_tools/gen2/research-tools/projectariatools/overview) for usage.
+### `aria_rerun_viewer` (Python, Rerun)
+
+Rerun-based interactive viewer for any VRS file. Works on Gen 1 and Gen 2. Renders camera frames alongside IMU / audio / barometer / magnetometer time series, and overlays on-device perception (VIO trajectory, eye gaze, hand tracking) in a 3D scene.
+
+**Use when**: you want a quick interactive look at a VRS file — one tool covers most sensor streams. Default first choice for "just show me what's in this recording".
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projectaria_tools/tools/aria_rerun_viewer
+
+### `viewer_mps` (Python, Rerun)
+
+Rerun-based viewer specialized for **MPS output overlays** — trajectories, semi-dense point clouds, eye gaze, hand tracking. Auto-detects MPS data under `<vrs_file>/mps/`, or accepts individual file paths. Supports both a desktop window and a web-browser mode.
+
+**Use when**: you need to validate or visually inspect MPS results against the source VRS — see how trajectory + point cloud + sensor frames align in 3D.
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projectaria_tools/tools/viewer_mps
+
+### `aria_viewer` (C++ / Pangolin)
+
+Native-performance VRS viewer built with Pangolin. **Not in the pip package** — requires a CMake source build (see Advanced Installation in the repo README). If Pangolin isn't found during the build, the viewer simply isn't compiled.
+
+**Use when**: you need native playback performance, or you're already in a C++ build environment.
+
+**Known issue**: high-frequency Gen 2 playback can show asynchronous camera updates (CPU image-decode limits). Workarounds: fall back to `aria_rerun_viewer`, slow down via the speed slider, or use the timestamp slider for random access (always works correctly).
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/tools/visualization
+
+### `vrs_to_mp4`
+
+Converts camera streams from a VRS file into a standard MP4 video.
+
+**Use when**: you need a shareable / previewable video file — for presentations, web embedding, or sharing with non-Aria users who don't have PAT.
+
+**Do NOT use for CV / AI pipelines.** Output is lossy compressed video — feed those pipelines decoded frames from `VrsDataProvider` instead.
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projectaria_tools/tools/vrs_to_mp4
+
+### `gen2_mp_csv_exporter`
+
+Exports **on-device** machine-perception streams (VIO, eye gaze, hand tracking, online calibration) from a Gen 2 VRS into CSV / JSONL files in the **same format as cloud MPS outputs**.
+
+**Use when**:
+- You want to compare on-device perception against cloud MPS on the same recording.
+- You want to reuse MPS-loading code on a recording you haven't sent through MPS.
+
+Gen 2 only. Streams not present in the recording are skipped silently.
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projectaria_tools/tools/gen2_mp_csv_exporter
+
+### `aria_dataset_downloader`
+
+Downloads Aria open datasets in bulk from a CDN URL manifest file. You first obtain the manifest from the dataset's download page, then this tool fetches the full dataset — or a selected subset of sequences and data groups — into a local folder, with resumable downloads.
+
+**Use when**: you're working with any Aria open dataset and want to pull it locally for offline processing, rather than streaming or sequence-by-sequence manual download.
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projectaria_tools/tools/dataset_downloader
+
+### `dtc_object_downloader`
+
+Downloads 3D object assets from the **Digital Twin Catalog (DTC)** — the object library used by Aria Digital Twin and related dataset projects.
+
+**Use when**: you're working with DTC-based projects and need the underlying 3D object models locally.
+
+Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projectaria_tools/projects/dtc_objects
 
 ## Glossary
 
