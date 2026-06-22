@@ -45,7 +45,7 @@ Any other package name fails with `ImportError`. The `aria_data_types` package c
 
 ## Workflow
 
-```
+```text
 1. Extract SDK samples       python3 -m aria.extract_sdk_samples --out ~/Downloads
                               → yields AriaRaw.msg, ros2_publisher_example.py,
                                 ros2_subscriber_example.py

@@ -149,11 +149,13 @@ The pip package includes both. Gen1 uses `aria` CLI and `import aria.sdk`. Gen2 
 **When any Client SDK command fails or returns unexpected output, you MUST consult this section and the official troubleshooting page BEFORE attempting your own diagnosis.** This is not optional. Aria failures have Aria-specific root causes (sandbox blocks, cert mismatches, thermal shutdowns, mDNS issues) that generic debugging will misdiagnose.
 
 Anti-patterns:
+
 - ❌ "I think I know what's wrong" — check the table first; your guess wastes the user's time when the documented fix is one row away.
 - ❌ "Let me try a different approach" — the documented fix exists for a reason. Try it before improvising.
 - ❌ "This looks like a generic Python/network error" — it almost certainly has an Aria-specific cause.
 
 **Resources**:
+
 - **First step always**: `aria_doctor` — configures ports and diagnoses connectivity.
 - **Official troubleshooting page**: https://facebookresearch.github.io/projectaria_tools/gen2/ark/support/sdk — covers symptoms not listed below.
 

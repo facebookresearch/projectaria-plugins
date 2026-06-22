@@ -242,6 +242,7 @@ Source: https://github.com/facebookresearch/projectaria_tools/tree/main/projecta
 Exports **on-device** machine-perception streams (VIO, eye gaze, hand tracking, online calibration) from a Gen 2 VRS into CSV / JSONL files in the **same format as cloud MPS outputs**.
 
 **Use when**:
+
 - You want to compare on-device perception against cloud MPS on the same recording.
 - You want to reuse MPS-loading code on a recording you haven't sent through MPS.
 

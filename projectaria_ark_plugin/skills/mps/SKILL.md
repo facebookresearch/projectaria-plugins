@@ -81,6 +81,7 @@ On-device eye gaze and VIO are embedded in the VRS during recording (accessible 
 **When any MPS command fails, returns unexpected output, or produces low-quality results, you MUST consult this section and the official troubleshooting page BEFORE attempting your own diagnosis.** This is not optional. MPS failures have MPS-specific root causes (health check rejections, insufficient recording length, coordinate frame mismatches) that generic debugging will misdiagnose.
 
 Anti-patterns:
+
 - ❌ "I think I know what's wrong" — check the list below and the official page first; your guess wastes the user's time when the documented fix is right here.
 - ❌ "Let me try reprocessing" — understand WHY it failed first. Blindly rerunning with `--force` wastes upload time and quota.
 - ❌ "This looks like a generic upload/network error" — MPS has specific retry and resumable upload logic. Check the CLI guide before improvising.

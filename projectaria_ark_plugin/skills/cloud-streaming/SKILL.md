@@ -21,7 +21,7 @@ If your collection point is on the **same WiFi** as the glasses, plain local str
 
 ## Architecture
 
-```
+```text
 Aria Glasses  ──(WiFi → internet)──►  Your HTTPS Server :6768
                   HTTPS POST              (decode / store / forward)
 ```
@@ -40,7 +40,7 @@ The glasses open an HTTPS connection to a URL you provide and POST sensor data c
 
 The certificates were generated when the SDK was first set up. They live on the PC where the SDK was installed at:
 
-```
+```text
 ~/.aria/streaming-certs/persistent/
 ├── subscriber.pem        # server cert (PEM)
 ├── subscriber-key.pem    # server private key
@@ -103,7 +103,7 @@ Without batching, the device will hit its thermal shutdown threshold (~44 °C) �
 
 **Workaround**: deploy a **public relay** — a small VM with a public IP that the glasses POST to — and forward via SSH / WireGuard tunnel into your internal server:
 
-```
+```text
 Aria Glasses ──► Public Relay (VM, public IP)  ─tunnel─►  Your Internal Server
                   HTTPS POST :6768               SSH /                (behind VPN)
                                                  WireGuard

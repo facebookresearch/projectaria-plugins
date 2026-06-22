@@ -9,7 +9,7 @@ This skill is the **knowledge index** for Project Aria Gen 2 and the Aria Resear
 
 ## How to use this skill
 
-```
+```text
 Question type                         → Action
 ─────────────────────────────────────────────────────────────────────────
 What is X? / How does Y work?         → Answer from this skill
@@ -104,7 +104,6 @@ Key behavior:
 - **No live ALS streaming** for external users — contact `AriaOps@meta.com` if needed.
 
 For channel peak wavelengths, sample rate, the full processing equations (normalize / flux / lux / CCT), factory calibration JSON layout, gain LUT, saturation rate, and PAT loading code: `/technical-specs/device/als`.
-
 
 ### IMU noise model
 
@@ -221,7 +220,7 @@ CPF is the midpoint of the left and right nominal pupil frames. **It exists only
 
 **Recommendation: don't use CPF.** Use a sensor-frame relative pose instead:
 
-```
+```text
 T_sensor1_sensor2 = T_Device_sensor1.inverse() * T_Device_sensor2
 ```
 
