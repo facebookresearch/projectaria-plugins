@@ -36,7 +36,7 @@ exclude = [
 ]
 
 # GitHub anchors are notoriously flaky to check — skip fragments only.
-include_fragments = false
+include_fragments = "none"
 
 # Don't follow `mailto:` links.
 include_mail = false
