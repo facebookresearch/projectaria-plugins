@@ -19,9 +19,15 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 
 ## Skills
 
-@./projectaria_ark_plugin/skills/projectaria-tools/SKILL.md
+@./projectaria_ark_plugin/skills/aria-knowledge/SKILL.md
 @./projectaria_ark_plugin/skills/client-sdk/SKILL.md
+@./projectaria_ark_plugin/skills/client-sdk-ros2-integration/SKILL.md
+@./projectaria_ark_plugin/skills/cloud-streaming/SKILL.md
+@./projectaria_ark_plugin/skills/custom-profile/SKILL.md
 @./projectaria_ark_plugin/skills/mps/SKILL.md
-@./projectaria_ark_plugin/skills/vrs-health-check/SKILL.md
 @./projectaria_ark_plugin/skills/pilot-dataset/SKILL.md
+@./projectaria_ark_plugin/skills/projectaria-tools/SKILL.md
+@./projectaria_ark_plugin/skills/timecode-bridge/SKILL.md
+@./projectaria_ark_plugin/skills/vrs-cli/SKILL.md
+@./projectaria_ark_plugin/skills/vrs-health-check/SKILL.md
 @./projectaria_ark_plugin/skills/web-app-creator/SKILL.md

@@ -1,6 +1,6 @@
 ---
 name: aria-knowledge
-description: Encoded knowledge for Project Aria Gen 2 and the Aria Research Kit (ARK) — hardware, profiles, calibration, coordinate systems, VRS format, time domains, on-device perception, MPS outputs (SLAM, point cloud, hand tracking), plus pointers to the source-of-truth docs for specifics. Use whenever the user asks ANY conceptual question about Aria Gen 2 / ARK and you need to either answer from encoded knowledge or know where to look next. This skill is the single index that tells an agent how to fetch official Aria knowledge — encoded stable concepts for what does not drift, explicit public-doc pointers for hardware specs / schemas / numerical values that do, and "go read the code" or "run --help" for things owned by source. Pair with the domain skills in this plugin (`projectaria-tools`, `client-sdk`, `mps`, `vrs-health-check`, `pilot-dataset`, `web-app-creator`, `custom-profile`, `vrs-cli`, `client-sdk-ros2-integration`, `cloud-streaming`) for hands-on work.
+description: Encoded knowledge for Project Aria Gen 2 and the Aria Research Kit (ARK) — hardware, profiles, calibration, coordinate systems, VRS format, time domains, on-device perception, MPS outputs (SLAM, point cloud, hand tracking), plus pointers to the source-of-truth docs for specifics. Use whenever the user asks ANY conceptual question about Aria Gen 2 / ARK and you need to either answer from encoded knowledge or know where to look next. This skill is the single index that tells an agent how to fetch official Aria knowledge — encoded stable concepts for what does not drift, explicit public-doc pointers for hardware specs / schemas / numerical values that do, and "go read the code" or "run --help" for things owned by source. Pair with the domain skills in this plugin (`projectaria-tools`, `client-sdk`, `mps`, `vrs-health-check`, `pilot-dataset`, `web-app-creator`, `custom-profile`, `vrs-cli`, `client-sdk-ros2-integration`, `cloud-streaming`, `timecode-bridge`) for hands-on work.
 ---
 
 # Aria Knowledge
@@ -56,6 +56,7 @@ Throughout this skill, paths like `/technical-specs/device/als` are **relative t
 | `vrs-cli` | Installing and using the native VRS CLI tools |
 | `client-sdk-ros2-integration` | ROS2 integration |
 | `cloud-streaming` | Streaming Aria data to internet-accessible HTTPS endpoints |
+| `timecode-bridge` | Time-syncing Aria with external LTC-timecoded gear (mocap, cameras, audio recorders) via the Timecode Bridge open-source hardware companion |
 
 ---
 
@@ -282,6 +283,10 @@ One device acts as **broadcaster**, the others as **receivers**:
 - PAT maps a receiver's local clock onto the broadcaster's with **sub-millisecond accuracy**.
 
 For multi-sequence alignment in the pilot dataset: `/research-tools/dataset/pilot/tutorials/multi_sequences_timestamp_alignment`.
+
+### External LTC sources (Timecode Bridge)
+
+The broadcaster in SubGHz TDM does not have to be another Aria device. **Timecode Bridge** (`https://github.com/facebookresearch/projectaria_timecode_bridge`) is an open-source hardware companion that ingests SMPTE LTC and re-broadcasts on the same sub-GHz protocol, letting Aria captures align with external timecoded video / audio / mocap gear. Glasses side runs as a standard Receiver — see the `timecode-bridge` skill for details.
 
 ---
 

@@ -27,6 +27,7 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 @./skills/mps/SKILL.md
 @./skills/pilot-dataset/SKILL.md
 @./skills/projectaria-tools/SKILL.md
+@./skills/timecode-bridge/SKILL.md
 @./skills/vrs-cli/SKILL.md
 @./skills/vrs-health-check/SKILL.md
 @./skills/web-app-creator/SKILL.md
