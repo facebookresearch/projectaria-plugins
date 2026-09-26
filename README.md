@@ -50,6 +50,25 @@ gemini extensions install https://github.com/facebookresearch/projectaria-plugin
 The extension loads the `GEMINI.md` context file at session start, which
 includes a tool mapping table and imports all ARK skill content.
 
+### Pi
+
+Install the repository as a Pi package:
+
+```bash
+pi install git:github.com/facebookresearch/projectaria-plugins
+```
+
+For a reproducible installation, pin a release tag or commit:
+
+```bash
+pi install git:github.com/facebookresearch/projectaria-plugins@<tag-or-commit>
+```
+
+The package loads the ARK skills as native Pi skills. Use
+`/skill:aria-knowledge` as the main entry point or type `/skill:` to browse the
+available domain skills. To install it only for the current project, add
+`--local` to either command.
+
 ## Plugins
 
 | Plugin | Description |
@@ -69,6 +88,7 @@ Before opening a PR, run the same checks CI runs:
 ```bash
 pip install -r scripts/requirements.txt
 python scripts/validate_marketplace.py
+python scripts/validate_pi_package.py
 python scripts/validate_skills.py
 python scripts/check_required_files.py
 npx -y markdownlint-cli2 "**/*.md"

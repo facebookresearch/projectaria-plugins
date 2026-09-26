@@ -31,6 +31,25 @@ codex plugin marketplace add https://github.com/facebookresearch/projectaria-plu
 Then open Codex chat, run `/plugin`, choose the Project Aria Plugins
 marketplace, and install `aria-ark`.
 
+### Pi
+
+Install the repository as a Pi package:
+
+```bash
+pi install git:github.com/facebookresearch/projectaria-plugins
+```
+
+Pin a release tag or commit when the same version must be deployed on multiple
+computers:
+
+```bash
+pi install git:github.com/facebookresearch/projectaria-plugins@<tag-or-commit>
+```
+
+Use `/skill:aria-knowledge` as the main entry point or type `/skill:` to browse
+the available domain skills. Add `--local` to install the package only for the
+current project.
+
 ## Skills
 
 | Skill | Purpose |

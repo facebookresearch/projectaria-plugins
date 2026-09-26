@@ -29,6 +29,9 @@ jobs:
       - name: Validate marketplace.json + plugin.json
         run: python scripts/validate_marketplace.py
 
+      - name: Validate Pi package
+        run: python scripts/validate_pi_package.py
+
   skills:
     name: Skill frontmatter validation
     runs-on: ubuntu-latest

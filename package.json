@@ -1,0 +1,24 @@
+{
+  "name": "projectaria-plugins",
+  "version": "1.0.0",
+  "description": "Project Aria smart glasses development resources for AI coding agents",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebookresearch/projectaria-plugins.git"
+  },
+  "keywords": [
+    "aria",
+    "ark",
+    "pi-package",
+    "projectaria",
+    "vrs",
+    "mps"
+  ],
+  "pi": {
+    "skills": [
+      "./projectaria_ark_plugin/skills"
+    ]
+  }
+}
