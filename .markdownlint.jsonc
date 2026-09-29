@@ -22,5 +22,10 @@
   "MD034": false,
 
   // Allow trailing punctuation in headings (e.g. "Q&A?").
-  "MD026": false
+  "MD026": false,
+
+  // Table pipe alignment/padding is not enforced. It is purely cosmetic (tables
+  // render identically either way) and keeping padding aligned causes diff churn
+  // whenever a cell's text length changes.
+  "MD060": false
 }
