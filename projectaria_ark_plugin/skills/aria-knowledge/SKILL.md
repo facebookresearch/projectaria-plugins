@@ -1,6 +1,6 @@
 ---
 name: aria-knowledge
-description: Encoded knowledge for Project Aria Gen 2 and the Aria Research Kit (ARK) — hardware, profiles, calibration, coordinate systems, VRS format, time domains, on-device perception, MPS outputs (SLAM, point cloud, hand tracking), plus pointers to the source-of-truth docs for specifics. Use whenever the user asks ANY conceptual question about Aria Gen 2 / ARK and you need to either answer from encoded knowledge or know where to look next. This skill is the single index that tells an agent how to fetch official Aria knowledge — encoded stable concepts for what does not drift, explicit public-doc pointers for hardware specs / schemas / numerical values that do, and "go read the code" or "run --help" for things owned by source. Pair with the domain skills in this plugin (`projectaria-tools`, `client-sdk`, `mps`, `vrs-health-check`, `pilot-dataset`, `web-app-creator`, `custom-profile`, `vrs-cli`, `client-sdk-ros2-integration`, `cloud-streaming`, `webrtc-streaming`, `timecode-bridge`) for hands-on work.
+description: Encoded knowledge for Project Aria Gen 2 and the Aria Research Kit (ARK) — hardware, profiles, calibration, coordinate systems, VRS format, time domains, on-device perception, MPS outputs (SLAM, point cloud, hand tracking), plus pointers to the source-of-truth docs for specifics. Use whenever the user asks ANY conceptual question about Aria Gen 2 / ARK and you need to either answer from encoded knowledge or know where to look next. This skill is the single index that tells an agent how to fetch official Aria knowledge — encoded stable concepts for what does not drift, explicit public-doc pointers for hardware specs / schemas / numerical values that do, and "go read the code" or "run --help" for things owned by source. Pair with the domain skills in this plugin (`projectaria-tools`, `client-sdk`, `mps`, `vrs-health-check`, `pilot-dataset`, `web-app-creator`, `custom-profile`, `vrs-cli`, `client-sdk-ros2-integration`, `cloud-streaming`, `webrtc-streaming`, `timecode-bridge`, `integrations`) for hands-on work.
 ---
 
 # Aria Knowledge
@@ -58,6 +58,7 @@ Throughout this skill, paths like `/technical-specs/device/als` are **relative t
 | `cloud-streaming` | Streaming Aria data to internet-accessible HTTPS endpoints |
 | `webrtc-streaming` | Low-latency WebRTC streaming with two-way audio, same-network or cross-network via a signaling server |
 | `timecode-bridge` | Time-syncing Aria with external LTC-timecoded gear (mocap, cameras, audio recorders) via the Timecode Bridge open-source hardware companion |
+| `integrations` | Running open-source research models on Aria data (FoundationStereo depth, HLOC relocalization) |
 
 ---
 
@@ -387,6 +388,8 @@ GitHub: `https://github.com/facebookresearch/EgoBlur`
 Lifts open-world 2D bounding boxes into static, global, fused **3D oriented bounding boxes** from posed images and semi-dense point clouds. Open-source.
 
 GitHub: `https://github.com/facebookresearch/boxer`
+
+For examples that run third-party open-source models on Aria data (depth from stereo, visual relocalization), see the **`integrations`** skill.
 
 ---
 

@@ -24,6 +24,7 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 @./skills/client-sdk-ros2-integration/SKILL.md
 @./skills/cloud-streaming/SKILL.md
 @./skills/custom-profile/SKILL.md
+@./skills/integrations/SKILL.md
 @./skills/mps/SKILL.md
 @./skills/pilot-dataset/SKILL.md
 @./skills/projectaria-tools/SKILL.md
