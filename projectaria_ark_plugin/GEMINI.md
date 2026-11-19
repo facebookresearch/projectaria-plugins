@@ -31,3 +31,4 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 @./skills/vrs-cli/SKILL.md
 @./skills/vrs-health-check/SKILL.md
 @./skills/web-app-creator/SKILL.md
+@./skills/webrtc-streaming/SKILL.md

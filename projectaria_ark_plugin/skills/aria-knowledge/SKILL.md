@@ -1,6 +1,6 @@
 ---
 name: aria-knowledge
-description: Encoded knowledge for Project Aria Gen 2 and the Aria Research Kit (ARK) — hardware, profiles, calibration, coordinate systems, VRS format, time domains, on-device perception, MPS outputs (SLAM, point cloud, hand tracking), plus pointers to the source-of-truth docs for specifics. Use whenever the user asks ANY conceptual question about Aria Gen 2 / ARK and you need to either answer from encoded knowledge or know where to look next. This skill is the single index that tells an agent how to fetch official Aria knowledge — encoded stable concepts for what does not drift, explicit public-doc pointers for hardware specs / schemas / numerical values that do, and "go read the code" or "run --help" for things owned by source. Pair with the domain skills in this plugin (`projectaria-tools`, `client-sdk`, `mps`, `vrs-health-check`, `pilot-dataset`, `web-app-creator`, `custom-profile`, `vrs-cli`, `client-sdk-ros2-integration`, `cloud-streaming`, `timecode-bridge`) for hands-on work.
+description: Encoded knowledge for Project Aria Gen 2 and the Aria Research Kit (ARK) — hardware, profiles, calibration, coordinate systems, VRS format, time domains, on-device perception, MPS outputs (SLAM, point cloud, hand tracking), plus pointers to the source-of-truth docs for specifics. Use whenever the user asks ANY conceptual question about Aria Gen 2 / ARK and you need to either answer from encoded knowledge or know where to look next. This skill is the single index that tells an agent how to fetch official Aria knowledge — encoded stable concepts for what does not drift, explicit public-doc pointers for hardware specs / schemas / numerical values that do, and "go read the code" or "run --help" for things owned by source. Pair with the domain skills in this plugin (`projectaria-tools`, `client-sdk`, `mps`, `vrs-health-check`, `pilot-dataset`, `web-app-creator`, `custom-profile`, `vrs-cli`, `client-sdk-ros2-integration`, `cloud-streaming`, `webrtc-streaming`, `timecode-bridge`) for hands-on work.
 ---
 
 # Aria Knowledge
@@ -56,6 +56,7 @@ Throughout this skill, paths like `/technical-specs/device/als` are **relative t
 | `vrs-cli` | Installing and using the native VRS CLI tools |
 | `client-sdk-ros2-integration` | ROS2 integration |
 | `cloud-streaming` | Streaming Aria data to internet-accessible HTTPS endpoints |
+| `webrtc-streaming` | Low-latency WebRTC streaming with two-way audio, same-network or cross-network via a signaling server |
 | `timecode-bridge` | Time-syncing Aria with external LTC-timecoded gear (mocap, cameras, audio recorders) via the Timecode Bridge open-source hardware companion |
 
 ---
@@ -367,6 +368,7 @@ For pairing: `/ark/companion-app/bluetooth-audio`.
 ### Other Client SDK adjacent skills
 
 - **Streaming to cloud HTTPS endpoints** — see the **`cloud-streaming`** skill.
+- **WebRTC streaming** (low latency, two-way audio, cross-network) — see the **`webrtc-streaming`** skill.
 - **ROS2 integration** — see the **`client-sdk-ros2-integration`** skill.
 - **Multi-device streaming server** (headless HTTPS server receiving from N devices) — see the `client-sdk` skill's multi-device section.
 

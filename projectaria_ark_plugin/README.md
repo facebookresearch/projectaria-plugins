@@ -66,6 +66,7 @@ current project.
 | vrs-cli | Use the native VRS CLI tools (`vrs check`, `vrs print`, …) from facebookresearch/vrs for file-level inspection and validation of Aria VRS files. Distinct from `projectaria-tools` (Aria sensor semantics) and from `vrs-health-check` (Aria recording quality). |
 | vrs-health-check | Validate Aria recording quality before MPS processing — detect dropped frames, sensor consistency issues, and calibration problems via the `run_vrs_health_check` CLI and Python API. |
 | web-app-creator | Build real-time webapps that stream live Aria Gen2 sensor data via WebSocket (`ws://localhost:17300`) — VIO, hand tracking, eye gaze, IMU, PPG, audio, camera — plus a full bidirectional voice pipeline (VAD, Whisper STT, LLM chat, TTS). macOS only. |
+| webrtc-streaming | Stream Aria Gen2 glasses over WebRTC instead of HTTP — low latency, two-way audio, cross-network via a signaling server and STUN/TURN, and on-device recording while streaming. |
 
 ## Requirements
 

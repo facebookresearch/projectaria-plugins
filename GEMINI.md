@@ -31,3 +31,4 @@ Skills use Claude Code tool names. When you encounter these in a skill, use your
 @./projectaria_ark_plugin/skills/vrs-cli/SKILL.md
 @./projectaria_ark_plugin/skills/vrs-health-check/SKILL.md
 @./projectaria_ark_plugin/skills/web-app-creator/SKILL.md
+@./projectaria_ark_plugin/skills/webrtc-streaming/SKILL.md
